@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-
-    [Header("Interfaz (UI)")]
-    [SerializeField] private GameObject menuPausaUI;
+    [Header("Paneles (UI)")]
+    public GameObject panelPausaPrincipal;
+    public GameObject panelOpciones;
 
     private ControlesJugador controles;
     private bool juegoPausado = false;
@@ -24,42 +24,62 @@ public class GameManager : MonoBehaviour
         Cursor.visible = false;
         Time.timeScale = 1f;
 
-        if (menuPausaUI != null)
-        {
-            menuPausaUI.SetActive(false);
-        }
+        // Nos aseguramos de que los menús empiecen apagados
+        if (panelPausaPrincipal != null) panelPausaPrincipal.SetActive(false);
+        if (panelOpciones != null) panelOpciones.SetActive(false);
     }
 
     private void Update()
     {
-        // El GameManager es el único que escucha la tecla ESC
+        // Detecta la tecla de pausa (ESC) con tu sistema de input
         if (controles.Jugador.Pausa.WasPressedThisFrame())
         {
-            AlternarPausa();
+            if (juegoPausado)
+            {
+                ReanudarJuego();
+            }
+            else
+            {
+                PausarJuego();
+            }
         }
     }
 
-    public void AlternarPausa() // Lo ponemos "public" para que el futuro botón del Canvas pueda usarlo
+    public void PausarJuego() // Era tu AlternarPausa, lo dividimos en dos para que sea más fácil de usar por los botones
     {
-        juegoPausado = !juegoPausado;
+        juegoPausado = true;
+        Time.timeScale = 0f; // Congela el tiempo
+        Cursor.lockState = CursorLockMode.None; // Libera el ratón
+        Cursor.visible = true;
 
-        if (juegoPausado)
-        {
-            Time.timeScale = 0f; // Congela el tiempo de Unity
-            Cursor.lockState = CursorLockMode.None; // Libera el ratón
-            Cursor.visible = true;
+        // Enciende el menú principal de pausa y apaga las opciones por si acaso
+        if (panelPausaPrincipal != null) panelPausaPrincipal.SetActive(true);
+        if (panelOpciones != null) panelOpciones.SetActive(false);
+    }
 
-            //Encender el menu
-            if (menuPausaUI != null) menuPausaUI.SetActive(true);
-        }
-        else
-        {
-            Time.timeScale = 1f; // Reanuda el tiempo
-            Cursor.lockState = CursorLockMode.Locked; // Atrapa el ratón
-            Cursor.visible = false;
-            
-            //Apagar el menu
-            if (menuPausaUI != null) menuPausaUI.SetActive(false);
-        }
+    public void ReanudarJuego()
+    {
+        juegoPausado = false;
+        Time.timeScale = 1f; // Reanuda el tiempo
+        Cursor.lockState = CursorLockMode.Locked; // Atrapa el ratón
+        Cursor.visible = false;
+
+        // Apaga todo
+        if (panelPausaPrincipal != null) panelPausaPrincipal.SetActive(false);
+        if (panelOpciones != null) panelOpciones.SetActive(false);
+    }
+
+    // --- FUNCIONES PARA LOS BOTONES ---
+
+    public void AbrirOpciones()
+    {
+        panelPausaPrincipal.SetActive(false);
+        panelOpciones.SetActive(true);
+    }
+
+    public void CerrarOpciones()
+    {
+        panelOpciones.SetActive(false);
+        panelPausaPrincipal.SetActive(true);
     }
 }
