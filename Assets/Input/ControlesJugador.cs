@@ -136,6 +136,15 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Correr"",
+                    ""type"": ""Button"",
+                    ""id"": ""8d293529-2ca3-4513-8f1f-6f594892b7b5"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -281,6 +290,28 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
                     ""action"": ""Pausa"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""41a779dc-b33c-4472-86ac-d613b6e6390b"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Correr"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""816bc506-0b33-4a37-9268-afc11de56a99"",
+                    ""path"": ""<Gamepad>/leftStickPress"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Correr"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -294,6 +325,7 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
         m_Jugador_Saltar = m_Jugador.FindAction("Saltar", throwIfNotFound: true);
         m_Jugador_CambiarCamara = m_Jugador.FindAction("CambiarCamara", throwIfNotFound: true);
         m_Jugador_Pausa = m_Jugador.FindAction("Pausa", throwIfNotFound: true);
+        m_Jugador_Correr = m_Jugador.FindAction("Correr", throwIfNotFound: true);
     }
 
     ~@ControlesJugador()
@@ -379,6 +411,7 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
     private readonly InputAction m_Jugador_Saltar;
     private readonly InputAction m_Jugador_CambiarCamara;
     private readonly InputAction m_Jugador_Pausa;
+    private readonly InputAction m_Jugador_Correr;
     /// <summary>
     /// Provides access to input actions defined in input action map "Jugador".
     /// </summary>
@@ -410,6 +443,10 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Jugador/Pausa".
         /// </summary>
         public InputAction @Pausa => m_Wrapper.m_Jugador_Pausa;
+        /// <summary>
+        /// Provides access to the underlying input action "Jugador/Correr".
+        /// </summary>
+        public InputAction @Correr => m_Wrapper.m_Jugador_Correr;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -451,6 +488,9 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
             @Pausa.started += instance.OnPausa;
             @Pausa.performed += instance.OnPausa;
             @Pausa.canceled += instance.OnPausa;
+            @Correr.started += instance.OnCorrer;
+            @Correr.performed += instance.OnCorrer;
+            @Correr.canceled += instance.OnCorrer;
         }
 
         /// <summary>
@@ -477,6 +517,9 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
             @Pausa.started -= instance.OnPausa;
             @Pausa.performed -= instance.OnPausa;
             @Pausa.canceled -= instance.OnPausa;
+            @Correr.started -= instance.OnCorrer;
+            @Correr.performed -= instance.OnCorrer;
+            @Correr.canceled -= instance.OnCorrer;
         }
 
         /// <summary>
@@ -552,5 +595,12 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnPausa(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Correr" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCorrer(InputAction.CallbackContext context);
     }
 }

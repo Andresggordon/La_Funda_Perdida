@@ -24,21 +24,23 @@ public class JugadorInteraccion : MonoBehaviour
 
         if (Physics.Raycast(rayo, out impacto, distanciaInteraccion, capaInteractuable))
         {
-            // Intentamos obtener el script del objeto que acabamos de mirar
-            ObjetoInteractuable interactuable = impacto.collider.GetComponent<ObjetoInteractuable>();
-
-            // Si el objeto tiene el script y NO es el mismo que ya estábamos mirando...
-            if (interactuable != null && interactuable != objetoMirado)
+            // OPTIMIZACIÓN PASO 1: Usamos TryGetComponent para evitar generar basura en memoria
+            // y comprobar/asignar en un solo paso.
+            if (impacto.collider.TryGetComponent(out ObjetoInteractuable interactuable))
             {
-                // Si ya teníamos otro objeto mirado de antes, le quitamos el resaltado
-                if (objetoMirado != null)
+                // Si el objeto tiene el script y NO es el mismo que ya estábamos mirando...
+                if (interactuable != objetoMirado)
                 {
-                    objetoMirado.DesactivarResaltado();
-                }
+                    // Si ya teníamos otro objeto mirado de antes, le quitamos el resaltado
+                    if (objetoMirado != null)
+                    {
+                        objetoMirado.DesactivarResaltado();
+                    }
 
-                // Guardamos el nuevo objeto como el actual y lo resaltamos
-                objetoMirado = interactuable;
-                objetoMirado.ActivarResaltado();
+                    // Guardamos el nuevo objeto como el actual y lo resaltamos
+                    objetoMirado = interactuable;
+                    objetoMirado.ActivarResaltado();
+                }
             }
         }
         else

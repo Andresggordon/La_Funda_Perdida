@@ -14,17 +14,10 @@ public class JugadorCamara : MonoBehaviour
     [SerializeField] private Vector3 posTerceraPersona = new Vector3(0f, 0f, -5f);
     [SerializeField] private Vector3 posVistaFrontal = new Vector3(0f, 0.3f, 5f);
 
-    private ControlesJugador controles;
     private float rotacionX = 0f;
     private int estadoCamara = 0;
 
-    private void Awake()
-    {
-        controles = new ControlesJugador();
-    }
-
-    private void OnEnable() { controles.Enable(); }
-    private void OnDisable() { controles.Disable(); }
+    // Hemos eliminado la variable 'controles', el 'Awake', el 'OnEnable' y el 'OnDisable'
 
     private void Start()
     {
@@ -45,7 +38,8 @@ public class JugadorCamara : MonoBehaviour
 
     private void ManejarVistas()
     {
-        if (controles.Jugador.CambiarCamara.WasPressedThisFrame())
+        // Leemos el botón de cambiar cámara desde el InputManager centralizado
+        if (InputManager.Instancia.controles.Jugador.CambiarCamara.WasPressedThisFrame())
         {
             if (camaraJugador == null) return;
 
@@ -72,7 +66,8 @@ public class JugadorCamara : MonoBehaviour
 
     private void ManejarRotacion()
     {
-        Vector2 inputMirar = controles.Jugador.Mirar.ReadValue<Vector2>();
+        // Leemos el movimiento del ratón desde el InputManager centralizado
+        Vector2 inputMirar = InputManager.Instancia.controles.Jugador.Mirar.ReadValue<Vector2>();
 
         float ratonX = inputMirar.x * sensibilidad * Time.deltaTime;
         float ratonY = inputMirar.y * sensibilidad * Time.deltaTime;
@@ -91,8 +86,6 @@ public class JugadorCamara : MonoBehaviour
     // Función pública para que el menú pueda modificar la sensibilidad
     public void CambiarSensibilidad(float nuevaSensibilidad)
     {
-        // Asegúrate de que el nombre de esta variable coincida con la que usas en tu script
-        // Si tu variable se llama 'sensibilidad', 'mouseSensitivity', etc., cámbialo aquí:
         sensibilidad = nuevaSensibilidad;
     }
 }

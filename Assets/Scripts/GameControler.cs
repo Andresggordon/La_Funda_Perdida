@@ -1,21 +1,12 @@
+using System;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Paneles (UI)")]
-    public GameObject panelPausaPrincipal;
-    public GameObject panelOpciones;
+    // Creamos un evento al que otros scripts podrán suscribirse
+    public static event Action<bool> AlPausarJuego;
 
-    private ControlesJugador controles;
     private bool juegoPausado = false;
-
-    private void Awake()
-    {
-        controles = new ControlesJugador();
-    }
-
-    private void OnEnable() { controles.Enable(); }
-    private void OnDisable() { controles.Disable(); }
 
     private void Start()
     {
@@ -23,63 +14,37 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         Time.timeScale = 1f;
-
-        // Nos aseguramos de que los menús empiecen apagados
-        if (panelPausaPrincipal != null) panelPausaPrincipal.SetActive(false);
-        if (panelOpciones != null) panelOpciones.SetActive(false);
     }
 
     private void Update()
     {
-        // Detecta la tecla de pausa (ESC) con tu sistema de input
-        if (controles.Jugador.Pausa.WasPressedThisFrame())
+        // Detecta la tecla de pausa (ESC) con tu InputManager
+        if (InputManager.Instancia.controles.Jugador.Pausa.WasPressedThisFrame())
         {
-            if (juegoPausado)
-            {
-                ReanudarJuego();
-            }
-            else
-            {
-                PausarJuego();
-            }
+            if (juegoPausado) ReanudarJuego();
+            else PausarJuego();
         }
     }
 
-    public void PausarJuego() // Era tu AlternarPausa, lo dividimos en dos para que sea más fácil de usar por los botones
+    public void PausarJuego()
     {
         juegoPausado = true;
-        Time.timeScale = 0f; // Congela el tiempo
-        Cursor.lockState = CursorLockMode.None; // Libera el ratón
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        // Enciende el menú principal de pausa y apaga las opciones por si acaso
-        if (panelPausaPrincipal != null) panelPausaPrincipal.SetActive(true);
-        if (panelOpciones != null) panelOpciones.SetActive(false);
+        // Gritamos a los cuatro vientos: "¡El juego se ha pausado!"
+        AlPausarJuego?.Invoke(true);
     }
 
     public void ReanudarJuego()
     {
         juegoPausado = false;
-        Time.timeScale = 1f; // Reanuda el tiempo
-        Cursor.lockState = CursorLockMode.Locked; // Atrapa el ratón
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // Apaga todo
-        if (panelPausaPrincipal != null) panelPausaPrincipal.SetActive(false);
-        if (panelOpciones != null) panelOpciones.SetActive(false);
-    }
-
-    // --- FUNCIONES PARA LOS BOTONES ---
-
-    public void AbrirOpciones()
-    {
-        panelPausaPrincipal.SetActive(false);
-        panelOpciones.SetActive(true);
-    }
-
-    public void CerrarOpciones()
-    {
-        panelOpciones.SetActive(false);
-        panelPausaPrincipal.SetActive(true);
+        // Gritamos a los cuatro vientos: "¡El juego ya NO está pausado!"
+        AlPausarJuego?.Invoke(false);
     }
 }
