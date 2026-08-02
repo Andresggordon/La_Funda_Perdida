@@ -4,26 +4,43 @@ public class GuardadoEnJuego : MonoBehaviour
 {
     [Header("Referencias")]
     public SaveManager saveManager;
-    public Transform transformJugador; // Para saber dónde está el jugador al darle al botón
 
-    // Esta función se la pondremos a tu nuevo botón de "Guardar"
+    [Header("Elementos a Guardar")]
+    public Transform transformJugador; // Posición actual del jugador
+    public Transform transformCamara;  // Posición actual de la cámara
+
+    // Aquí puedes enlazar la variable numérica de tu script de cámara (0, 1, 2...)
+    // O puedes pasarle el valor desde donde gestiones la perspectiva.
+    public int perspectivaActual = 1;
+
+    // Esta función se la pondremos a tu botón de "Guardar"
     public void Click_GuardarPartida()
     {
-        // 1. Primero, leemos los datos que ya existen en el archivo (para no borrar su inventario o vida)
+        // 1. Leemos los datos que ya existen para no perder nada (inventario, corazones, etc.)
         DatosPartida datosActuales = saveManager.CargarPartida();
 
-        // Por si acaso hubiera un error y no existiera el archivo, creamos uno en blanco
+        // Si no hay archivo previo, creamos uno nuevo con los valores por defecto
         if (datosActuales == null)
         {
             datosActuales = new DatosPartida();
         }
 
-        // 2. Actualizamos SOLO la posición en esos datos, copiando la posición real del jugador
-        datosActuales.posicionJugador = transformJugador.position;
+        // 2. Actualizamos los datos con la información real de la escena
+        if (transformJugador != null)
+        {
+            datosActuales.posicionJugador = transformJugador.position;
+        }
 
-        // 3. Sobrescribimos el archivo con la nueva información actualizada
+        if (transformCamara != null)
+        {
+            datosActuales.posicionCamara = transformCamara.position;
+        }
+
+        datosActuales.tipoPerspectiva = perspectivaActual;
+
+        // 3. Guardamos la caja actualizada en el disco duro
         saveManager.GuardarPartida(datosActuales);
 
-        Debug.Log("¡Partida guardada con éxito! El jugador está en: " + transformJugador.position);
+        Debug.Log("¡Partida guardada con éxito! Posición jugador: " + transformJugador.position);
     }
 }

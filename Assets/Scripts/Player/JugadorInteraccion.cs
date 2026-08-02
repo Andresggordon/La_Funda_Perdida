@@ -4,40 +4,56 @@ public class JugadorInteraccion : MonoBehaviour
 {
     [Header("Configuración de Interacción")]
     [SerializeField] private float distanciaInteraccion = 3f;
-    [SerializeField] private LayerMask capaInteractuable; // Filtro para ignorar paredes y suelo
+    [SerializeField] private LayerMask capaInteractuable;
 
     [Header("Referencias")]
-    [SerializeField] private Camera camaraPrincipal;
+    [SerializeField] private Transform transformOjos; // Tu SM_Chibi_Eye
+    [SerializeField] private Camera camaraPrincipal;  // La cámara principal
+    [SerializeField] private JugadorCamara jugadorCamara; // Referencia a tu script de cámara
 
     private ObjetoInteractuable objetoMirado;
 
     private void Update()
     {
-        // Lo ponemos en el Update para que compruebe constantemente qué estamos mirando
         DetectarObjeto();
     }
 
     private void DetectarObjeto()
     {
-        Ray rayo = camaraPrincipal.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+        if (transformOjos == null || camaraPrincipal == null || jugadorCamara == null) return;
+
+        // Copiamos la rotación de la cámara
+        transformOjos.rotation = camaraPrincipal.transform.rotation;
+
+        Vector3 origenRayo = transformOjos.position;
+        Vector3 direccionRayo = transformOjos.forward;
+
+        // ACCEDEMOS A TU ESTADO DE CÁMARA:
+        // Como no tenemos el estadoCamara público directamente, podemos saber si estamos en vista frontal (estado 2) 
+        // mirando si la rotación local en Y de la cámara tiene el giro de 180 grados (aprox), 
+        // O podemos hacer que estadoCamara sea público en el otro script. 
+        // Pero una forma rapidísima y sin tocar el otro script es comprobar si la cámara está mirando hacia el personaje:
+
+        // Si la cámara está delante del personaje (en posición Z positiva como en tu posVistaFrontal), 
+        // invertimos el rayo para que salga hacia el frente del personaje:
+        if (camaraPrincipal.transform.localPosition.z > 0f)
+        {
+            direccionRayo = -transformOjos.forward; // Invertimos el rayo en segunda persona
+        }
+
         RaycastHit impacto;
 
-        if (Physics.Raycast(rayo, out impacto, distanciaInteraccion, capaInteractuable))
+        if (Physics.Raycast(origenRayo, direccionRayo, out impacto, distanciaInteraccion, capaInteractuable))
         {
-            // OPTIMIZACIÓN PASO 1: Usamos TryGetComponent para evitar generar basura en memoria
-            // y comprobar/asignar en un solo paso.
             if (impacto.collider.TryGetComponent(out ObjetoInteractuable interactuable))
             {
-                // Si el objeto tiene el script y NO es el mismo que ya estábamos mirando...
                 if (interactuable != objetoMirado)
                 {
-                    // Si ya teníamos otro objeto mirado de antes, le quitamos el resaltado
                     if (objetoMirado != null)
                     {
                         objetoMirado.DesactivarResaltado();
                     }
 
-                    // Guardamos el nuevo objeto como el actual y lo resaltamos
                     objetoMirado = interactuable;
                     objetoMirado.ActivarResaltado();
                 }
@@ -45,10 +61,8 @@ public class JugadorInteraccion : MonoBehaviour
         }
         else
         {
-            // Si el rayo choca con una pared o mira al aire, y teníamos un objeto seleccionado...
             if (objetoMirado != null)
             {
-                // Le quitamos el color y vaciamos la variable
                 objetoMirado.DesactivarResaltado();
                 objetoMirado = null;
             }
