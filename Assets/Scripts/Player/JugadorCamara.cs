@@ -11,11 +11,11 @@ public class JugadorCamara : MonoBehaviour
 
     [Header("Sistema de Cámaras")]
     [SerializeField] private Vector3 posPrimeraPersona = new Vector3(0f, 0f, 0f);
-    [SerializeField] private Vector3 posTerceraPersona = new Vector3(0f, 0f, -5f);
+    [SerializeField] private Vector3 posTerceraPersona = new Vector3(1.2f, 2f, -5f);
     [SerializeField] private Vector3 posVistaFrontal = new Vector3(0f, 0.3f, 5f);
 
     private float rotacionX = 0f;
-    private int estadoCamara = 0;
+    public int estadoCamara = 0;
 
     // Hemos eliminado la variable 'controles', el 'Awake', el 'OnEnable' y el 'OnDisable'
 
