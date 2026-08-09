@@ -293,6 +293,17 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""34d261aa-4c2a-4bc9-8e62-d33e2616323e"",
+                    ""path"": ""<DualShockGamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pausa"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""41a779dc-b33c-4472-86ac-d613b6e6390b"",
                     ""path"": ""<Keyboard>/leftShift"",
                     ""interactions"": """",

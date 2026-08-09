@@ -3,27 +3,25 @@ using UnityEngine.EventSystems;
 using System.Collections;
 
 [RequireComponent(typeof(AudioSource))]
-public class BotonAnimado : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, ISelectHandler, IDeselectHandler
+public class SliderAnimado : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, ISelectHandler, IDeselectHandler
 {
     [Header("Ajustes de Animación")]
-    public float factorEscala = 1.1f;
+    public float factorEscalaHover = 1.05f;
+    public float factorEscalaAgarre = 1.08f;
     public float velocidadAnimacion = 15f;
-    public float distanciaHundimiento = 4f;
 
     [Header("Ajustes de Sonido")]
     public AudioClip sonidoHover;
     [Range(0f, 1f)] public float volumenSonido = 0.5f;
 
     private Vector3 escalaOriginal;
-    private Vector3 posicionOriginal;
     private Coroutine animacionActual;
     private AudioSource audioSource;
-    private bool estaSeleccionado = false; // Control de seguridad añadido
+    private bool estaSeleccionado = false;
 
     private void Start()
     {
         escalaOriginal = transform.localScale;
-        posicionOriginal = transform.localPosition;
 
         audioSource = GetComponent<AudioSource>();
         audioSource.playOnAwake = false;
@@ -33,42 +31,55 @@ public class BotonAnimado : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     // --- RATÓN: Entrar ---
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // ¡LA SOLUCIÓN! Obligamos al mando a enfocarse en lo que toca el ratón
+        // Obligamos al mando a enfocarse en este slider cuando el ratón lo toca
         EventSystem.current.SetSelectedGameObject(this.gameObject);
     }
 
     // --- RATÓN: Salir ---
     public void OnPointerExit(PointerEventData eventData)
     {
-        // Al quitar el ratón, soltamos el botón para que Unity lo devuelva a su color normal
+        // Al quitar el ratón, soltamos el slider
         EventSystem.current.SetSelectedGameObject(null);
     }
 
-    // --- JOYSTICK / TECLADO: Seleccionado ---
+    // --- MANDO / TECLADO: Seleccionado ---
     public void OnSelect(BaseEventData eventData)
     {
         if (!estaSeleccionado)
         {
             estaSeleccionado = true;
-            ActivarEfectoSeleccion();
+            ActivarEfectoHover();
         }
     }
 
-    // --- JOYSTICK / TECLADO: Deseleccionado ---
+    // --- MANDO / TECLADO: Deseleccionado ---
     public void OnDeselect(BaseEventData eventData)
     {
         if (estaSeleccionado)
         {
             estaSeleccionado = false;
-            DesactivarEfectoSeleccion();
+            DesactivarEfecto();
         }
     }
 
-    // Lógica unificada para cuando el botón se ilumina
-    private void ActivarEfectoSeleccion()
+    // --- INTERACCIÓN: Hacer clic o agarrar ---
+    public void OnPointerDown(PointerEventData eventData)
     {
         if (animacionActual != null) StopCoroutine(animacionActual);
-        animacionActual = StartCoroutine(AnimarEscala(escalaOriginal * factorEscala));
+        animacionActual = StartCoroutine(AnimarEscala(escalaOriginal * factorEscalaAgarre));
+    }
+
+    // --- INTERACCIÓN: Soltar ---
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (animacionActual != null) StopCoroutine(animacionActual);
+        animacionActual = StartCoroutine(AnimarEscala(estaSeleccionado ? escalaOriginal * factorEscalaHover : escalaOriginal));
+    }
+
+    private void ActivarEfectoHover()
+    {
+        if (animacionActual != null) StopCoroutine(animacionActual);
+        animacionActual = StartCoroutine(AnimarEscala(escalaOriginal * factorEscalaHover));
 
         if (sonidoHover != null)
         {
@@ -76,23 +87,10 @@ public class BotonAnimado : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         }
     }
 
-    // Lógica unificada para cuando se deselecciona
-    private void DesactivarEfectoSeleccion()
+    private void DesactivarEfecto()
     {
         if (animacionActual != null) StopCoroutine(animacionActual);
         animacionActual = StartCoroutine(AnimarEscala(escalaOriginal));
-        transform.localPosition = posicionOriginal;
-    }
-
-    // --- CLICK 3D (Hundir) ---
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        transform.localPosition = new Vector3(posicionOriginal.x, posicionOriginal.y - distanciaHundimiento, posicionOriginal.z);
-    }
-
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        transform.localPosition = posicionOriginal;
     }
 
     private IEnumerator AnimarEscala(Vector3 escalaDestino)

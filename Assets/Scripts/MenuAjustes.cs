@@ -31,14 +31,12 @@ public class MenuAjustes : MonoBehaviour
 
     private void Start()
     {
-        // 1. CARGAR DATOS (Si no hay nada guardado, por defecto será 100 o el valor seguro)
         float fov = PlayerPrefs.GetFloat("ajustes_fov", 60f);
         float sens = PlayerPrefs.GetFloat("ajustes_sensibilidad", 50f);
         float volMaster = PlayerPrefs.GetFloat("ajustes_volMaster", 100f);
         float volSFX = PlayerPrefs.GetFloat("ajustes_volSFX", 100f);
         float brillo = PlayerPrefs.GetFloat("ajustes_brillo", 100f);
 
-        // 2. CONFIGURAR INTERFAZ Y TEXTOS
         ConfigurarSlider(sliderFOV, fov, CambiarFOV);
         ActualizarTexto(textoValorFOV, fov, "0");
 
@@ -54,7 +52,6 @@ public class MenuAjustes : MonoBehaviour
         ConfigurarSlider(sliderBrillo, brillo, CambiarBrillo);
         ActualizarTexto(textoValorBrillo, brillo, "0");
 
-        // 3. APLICAR AL ENTORNO
         if (camaraPrincipal != null) camaraPrincipal.fieldOfView = fov;
         if (jugadorCamara != null) jugadorCamara.CambiarSensibilidad(sens);
 
@@ -63,7 +60,6 @@ public class MenuAjustes : MonoBehaviour
         CambiarBrillo(brillo);
     }
 
-    // --- FUNCIONES DE AUDIO ---
     public void CambiarVolumenMaster(float valor)
     {
         float valorNormalizado = Mathf.Clamp(valor / 100f, 0.0001f, 1f);
@@ -74,7 +70,7 @@ public class MenuAjustes : MonoBehaviour
 
         ActualizarTexto(textoValorVolMaster, valor, "0");
         PlayerPrefs.SetFloat("ajustes_volMaster", valor);
-        PlayerPrefs.Save(); // Obliga a Unity a guardar en disco inmediatamente
+        PlayerPrefs.Save();
     }
 
     public void CambiarVolumenSFX(float valor)
@@ -86,17 +82,12 @@ public class MenuAjustes : MonoBehaviour
             float decibelios = Mathf.Log10(valorNormalizado) * 20f;
             mezcladorDeAudio.SetFloat("VolumenSFX", decibelios);
         }
-        else
-        {
-            Debug.LogWarning("¡El AudioMixer en el script está vacío (Null)!");
-        }
 
         ActualizarTexto(textoValorVolSFX, valor, "0");
         PlayerPrefs.SetFloat("ajustes_volSFX", valor);
         PlayerPrefs.Save();
     }
 
-    // --- FUNCIÓN DE BRILLO ---
     public void CambiarBrillo(float valor)
     {
         if (capaBrilloUI != null)
@@ -113,7 +104,6 @@ public class MenuAjustes : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    // --- RESTO DE FUNCIONES ---
     public void CambiarFOV(float valor)
     {
         if (camaraPrincipal != null) camaraPrincipal.fieldOfView = valor;
