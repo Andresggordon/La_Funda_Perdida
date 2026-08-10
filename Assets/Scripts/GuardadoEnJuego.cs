@@ -4,28 +4,24 @@ public class GuardadoEnJuego : MonoBehaviour
 {
     [Header("Referencias")]
     public SaveManager saveManager;
+    public InventoryManager inventoryManager; // NUEVO: Para acceder a la lista de setas destruidas
 
     [Header("Elementos a Guardar")]
-    public Transform transformJugador; // Posición actual del jugador
-    public Transform transformCamara;  // Posición actual de la cámara
-
-    // Aquí puedes enlazar la variable numérica de tu script de cámara (0, 1, 2...)
-    // O puedes pasarle el valor desde donde gestiones la perspectiva.
+    public Transform transformJugador;
+    public Transform transformCamara;
     public int perspectivaActual = 1;
 
-    // Esta función se la pondremos a tu botón de "Guardar"
     public void Click_GuardarPartida()
     {
-        // 1. Leemos los datos que ya existen para no perder nada (inventario, corazones, etc.)
+        // 1. Leemos los datos que ya existen
         DatosPartida datosActuales = saveManager.CargarPartida();
 
-        // Si no hay archivo previo, creamos uno nuevo con los valores por defecto
         if (datosActuales == null)
         {
             datosActuales = new DatosPartida();
         }
 
-        // 2. Actualizamos los datos con la información real de la escena
+        // 2. Actualizamos los datos del jugador y cámara
         if (transformJugador != null)
         {
             datosActuales.posicionJugador = transformJugador.position;
@@ -38,9 +34,28 @@ public class GuardadoEnJuego : MonoBehaviour
 
         datosActuales.tipoPerspectiva = perspectivaActual;
 
-        // 3. Guardamos la caja actualizada en el disco duro
+        // --- GUARDAR INVENTARIO ---
+        if (inventoryManager != null)
+        {
+            datosActuales.nombresObjetosInventario.Clear();
+            foreach (ItemData item in inventoryManager.objetosActuales)
+            {
+                if (item != null)
+                {
+                    datosActuales.nombresObjetosInventario.Add(item.name); // Guardamos el nombre del archivo ItemData
+                }
+            }
+        }
+
+        // --- NUEVO: GUARDAR LA LISTA DE OBJETOS DESTRUIDOS ---
+        if (inventoryManager != null)
+        {
+            datosActuales.objetosDestruidosUID = inventoryManager.objetosDestruidosUID;
+        }
+
+        // 3. Guardamos todo en el disco duro
         saveManager.GuardarPartida(datosActuales);
 
-        Debug.Log("¡Partida guardada con éxito! Posición jugador: " + transformJugador.position);
+        Debug.Log("¡Partida guardada con éxito! Objetos destruidos guardados: " + datosActuales.objetosDestruidosUID.Count);
     }
 }

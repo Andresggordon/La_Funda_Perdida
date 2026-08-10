@@ -4,27 +4,64 @@ public class CargarDatosJugador : MonoBehaviour
 {
     [Header("Referencias")]
     public SaveManager saveManager;
+    public ItemDatabase baseDeDatosItems; // NUEVO: Arrastra aquí tu base de datos recién creada
 
     private void Start()
     {
-        // 1. Nada más empezar el nivel, le pedimos los datos al SaveManager
         DatosPartida misDatos = saveManager.CargarPartida();
 
-        // 2. Comprobamos que el archivo existe por si acaso
         if (misDatos != null)
         {
-            // 3. ¡Aplicamos los datos!
-            // Colocamos al jugador en las coordenadas exactas que diga el archivo
-            transform.position = misDatos.posicionJugador;
+            // 1. Buscamos el Character Controller
+            CharacterController controller = GetComponent<CharacterController>();
 
-            // (Si tuvieras ya un script de vida, aquí le dirías:)
-            // miScriptDeSalud.corazones = misDatos.corazonesJugador;
+            // 2. Lo apagamos temporalmente para evitar tirones físicos
+            if (controller != null)
+            {
+                controller.enabled = false;
+            }
+
+            // 3. Aplicamos la posición guardada
+            Vector3 posicionSegura = misDatos.posicionJugador;
+            posicionSegura.y += 0.5f;
+            transform.position = posicionSegura;
+
+            // 4. Lo volvemos a encender
+            if (controller != null)
+            {
+                controller.enabled = true;
+            }
 
             Debug.Log("¡Jugador cargado correctamente en la posición: " + transform.position + "!");
         }
-        else
+
+        // Buscamos el inventario
+        InventoryManager inventario = GetComponent<InventoryManager>();
+
+        if (misDatos != null && inventario != null)
         {
-            Debug.LogError("Error: No se encontró ningún archivo de guardado al entrar al mundo.");
+            // --- RECUPERAR LOS OBJETOS DESTRUIDOS AL CARGAR ---
+            if (misDatos.objetosDestruidosUID != null)
+            {
+                inventario.objetosDestruidosUID = misDatos.objetosDestruidosUID;
+            }
+
+            // --- CARGAR INVENTARIO USANDO LA BASE DE DATOS ---
+            if (misDatos.nombresObjetosInventario != null && baseDeDatosItems != null)
+            {
+                inventario.objetosActuales.Clear();
+
+                foreach (string nombreItem in misDatos.nombresObjetosInventario)
+                {
+                    // Buscamos el objeto en nuestra Base de Datos personalizada
+                    ItemData objetoCargado = baseDeDatosItems.ObtenerItemPorNombre(nombreItem);
+
+                    if (objetoCargado != null)
+                    {
+                        inventario.objetosActuales.Add(objetoCargado);
+                    }
+                }
+            }
         }
     }
 }
