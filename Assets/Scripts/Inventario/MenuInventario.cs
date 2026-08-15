@@ -24,6 +24,11 @@ public class MenuInventario : MonoBehaviour
     // Sistema estilo Minecraft: Objeto real en el cursor
     private ItemData itemEnMano = null;
 
+    [Header("Vista 3D Personaje")]
+    public GameObject camaraInventario3D; // Arrastra aquí la cámara que acabamos de crear
+    public ControladorMiradaInventario controladorMirada; // Arrastra aquí el modelo de Paula
+
+
     private void Start()
     {
         if (panelInventarioUI != null) panelInventarioUI.SetActive(false);
@@ -176,13 +181,16 @@ public class MenuInventario : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
+        // --- NUEVO: Activamos la vista 3D ---
+        if (camaraInventario3D != null) camaraInventario3D.SetActive(true);
+        if (controladorMirada != null) controladorMirada.rastrearRaton = true;
+
         if (iconoObjetoEnMano != null) iconoObjetoEnMano.transform.SetAsLastSibling();
         RefrescarVisuales();
     }
 
     private void CerrarInventario()
     {
-        // Si cerramos el menú con un objeto en la mano, lo devolvemos al inventario
         if (itemEnMano != null)
         {
             inventoryManager.AnadirObjeto(itemEnMano);
@@ -195,6 +203,11 @@ public class MenuInventario : MonoBehaviour
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        // --- NUEVO: Desactivamos la vista 3D ---
+        if (camaraInventario3D != null) camaraInventario3D.SetActive(false);
+        if (controladorMirada != null) controladorMirada.rastrearRaton = false;
+
         RefrescarVisuales();
     }
 
