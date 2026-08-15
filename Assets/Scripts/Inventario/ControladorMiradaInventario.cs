@@ -1,51 +1,76 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[DefaultExecutionOrder(100)]
 public class ControladorMiradaInventario : MonoBehaviour
 {
-    [Header("Referencias")]
-    [Tooltip("La cámara exclusiva del inventario que renderiza a Paula")]
-    public Camera camaraInventario;
-
-    [Tooltip("IMPORTANTE: Despliega el esqueleto de tu personaje y arrastra aquí el GameObject que corresponde al hueso del CUELLO o la CABEZA.")]
+    [Header("Referencias Principales")]
+    [Tooltip("El hueso Head o Neck dentro del esqueleto de Paula")]
     public Transform huesoCabeza;
 
-    [Header("Ajustes de Mirada")]
+    [Tooltip("Arrastra aquí el 'VistaPersonaje_RawImage' de tu UI. Así calculamos el centro exacto de la mirada.")]
+    public RectTransform rawImagePersonaje;
+
+    [Header("Límites de Mirada")]
     public float suavidad = 15f;
-    public float distanciaZVirtual = 2f; // Profundidad de proyección del ratón
+    public float anguloMaximoHorizontal = 45f;
+    public float anguloMaximoVertical = 30f;
 
-    [HideInInspector] public bool rastrearRaton = false;
+    [Header("Mapeo de Ejes (¡Solución al ladeo!)")]
+    [Tooltip("Pon un 1 en el eje que hace que la cabeza diga 'NO'. Si se ladea, ponlo en 0 y prueba con el eje Z (0, 0, 1) o X (1, 0, 0).")]
+    public Vector3 ejeHorizontal = new Vector3(0, 1, 0);
 
-    private Vector3 posicionObjetivo;
+    [Tooltip("Pon un 1 en el eje que hace que la cabeza diga 'SÍ'.")]
+    public Vector3 ejeVertical = new Vector3(1, 0, 0);
 
-    private void Update()
-    {
-        // Solo calculamos la posición si el inventario está abierto y tenemos las referencias
-        if (!rastrearRaton || camaraInventario == null || Mouse.current == null || huesoCabeza == null) return;
+    [Header("Corrección Base")]
+    [Tooltip("Úsalo si la cabeza mira hacia atrás o está rotada por defecto (Ej: 0, 180, 0)")]
+    public Vector3 offsetRotacion;
 
-        // Leemos la posición real del ratón usando el New Input System
-        Vector2 ratonPos2D = Mouse.current.position.ReadValue();
+    [Header("Auditoría")]
+    public bool rastrearRaton = false;
 
-        // Convertimos la posición de la pantalla a un punto en el espacio 3D real
-        Vector3 ratonPos3D = new Vector3(ratonPos2D.x, ratonPos2D.y, distanciaZVirtual);
-        posicionObjetivo = camaraInventario.ScreenToWorldPoint(ratonPos3D);
-    }
+    private float smoothX;
+    private float smoothY;
+    private Quaternion rotacionAnimacion;
 
-    // Usamos LateUpdate para Rigs Generic. Se ejecuta justo DESPUÉS de que el Animator posicione los huesos.
     private void LateUpdate()
     {
-        if (!rastrearRaton || huesoCabeza == null) return;
+        if (huesoCabeza == null || !rastrearRaton || Mouse.current == null) return;
 
-        // 1. Calculamos la dirección desde la cabeza hacia el cursor del ratón
-        Vector3 direccionHaciaRaton = posicionObjetivo - huesoCabeza.position;
+        Vector2 ratonPos = Mouse.current.position.ReadValue();
+        float normalX = 0f;
+        float normalY = 0f;
 
-        // 2. Calculamos la rotación matemática necesaria para mirar en esa dirección
-        if (direccionHaciaRaton != Vector3.zero)
+        // 1. Calculamos dónde está el ratón pero SOLO relativo al recuadro de Paula
+        if (rawImagePersonaje != null)
         {
-            Quaternion rotacionDeseada = Quaternion.LookRotation(direccionHaciaRaton);
-
-            // 3. Suavizamos la rotación de la cabeza (usando unscaledDeltaTime porque el juego está pausado a Time.timeScale = 0f)
-            huesoCabeza.rotation = Quaternion.Slerp(huesoCabeza.rotation, rotacionDeseada, Time.unscaledDeltaTime * suavidad);
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rawImagePersonaje, ratonPos, null, out Vector2 localPoint))
+            {
+                Rect rect = rawImagePersonaje.rect;
+                // Normalizamos de -1 a 1 basado en el ancho y alto del RawImage
+                normalX = Mathf.Clamp(localPoint.x / (rect.width / 2f), -1f, 1f);
+                normalY = Mathf.Clamp(localPoint.y / (rect.height / 2f), -1f, 1f);
+            }
         }
+
+        // 2. Interpolar suavemente el movimiento 
+        smoothX = Mathf.Lerp(smoothX, normalX, Time.unscaledDeltaTime * suavidad);
+        smoothY = Mathf.Lerp(smoothY, normalY, Time.unscaledDeltaTime * suavidad);
+
+        // 3. Generamos los grados a girar
+        float gradosHorizontal = smoothX * anguloMaximoHorizontal;
+        float gradosVertical = -smoothY * anguloMaximoVertical;
+
+        // Guardamos cómo la dejó el Animator (por si está respirando o saltando)
+        rotacionAnimacion = huesoCabeza.localRotation;
+
+        // 4. LA MAGIA: Multiplicamos los grados por los ejes que elijas en el Inspector
+        Vector3 rotacionDeseada = (ejeHorizontal * gradosHorizontal) + (ejeVertical * gradosVertical) + offsetRotacion;
+
+        Quaternion rotacionMirada = Quaternion.Euler(rotacionDeseada);
+
+        // 5. Aplicamos la rotación combinada
+        huesoCabeza.localRotation = rotacionAnimacion * rotacionMirada;
     }
 }
