@@ -2,8 +2,11 @@ using UnityEngine;
 
 public class HotbarUI : MonoBehaviour
 {
-    [Header("Referencias")]
+    [Header("Referencias Principales")]
     [SerializeField] private InventoryManager inventoryManager;
+
+    [Tooltip("Arrastra aquí a Paula (el GameObject que tiene el script GestorEquipamiento)")]
+    [SerializeField] private GestorEquipamiento gestorEquipamiento; // NUEVA REFERENCIA
 
     [Header("Slots Visuales de la Hotbar")]
     [Tooltip("Arrastra aquí los componentes 'InventarioSlot' de Slot_1, Slot_2, Slot_3 y Slot_4")]
@@ -21,6 +24,9 @@ public class HotbarUI : MonoBehaviour
         ComprobarInputsHotbar();
         SincronizarSlots();
         AnimarSeleccion();
+
+        // Ejecutamos la nueva comprobación en tiempo real
+        SincronizarModeloEnMano();
     }
 
     private void ComprobarInputsHotbar()
@@ -69,5 +75,30 @@ public class HotbarUI : MonoBehaviour
             Vector3 escalaDestino = (i == slotActivoIndex) ? Vector3.one * escalaSeleccionado : Vector3.one;
             contenedoresSlots[i].localScale = Vector3.Lerp(contenedoresSlots[i].localScale, escalaDestino, Time.unscaledDeltaTime * velocidadAnimacion);
         }
+    }
+
+    // --- LA MAGIA DEL RETO 1 ---
+    private void SincronizarModeloEnMano()
+    {
+        // Seguridad por si aún no hemos enlazado las referencias en el Inspector
+        if (gestorEquipamiento == null || inventoryManager == null) return;
+
+        // 1. Miramos qué objeto hay en los datos internos de ese hueco de la mochila
+        ItemData itemEnElSlotActivo = inventoryManager.slots[slotActivoIndex];
+
+        // 2. Le preguntamos a Paula qué lleva físicamente en la mano ahora mismo
+        ItemData itemFisicoEnMano = gestorEquipamiento.ObtenerItemEquipado();
+
+        // 3. Si son diferentes (ej. pulsaste el '2', y había otro objeto, o lo acabas de tirar), actualizamos
+        if (itemEnElSlotActivo != itemFisicoEnMano)
+        {
+            gestorEquipamiento.EquiparObjeto(itemEnElSlotActivo);
+        }
+    }
+
+    // Función pública vital para que los Retos 2 y 3 puedan saber de dónde sacar el objeto
+    public int ObtenerIndiceSlotActivo()
+    {
+        return slotActivoIndex;
     }
 }

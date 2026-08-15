@@ -13,6 +13,9 @@ public class ItemData : ScriptableObject
     public Sprite icono;
     public bool esConsumible;
 
+    [Tooltip("El modelo 3D que aparecerá en la mano o en el suelo al tirarlo")]
+    public GameObject prefabMundo;
+
     // Este método virtual permite que cada tipo de objeto decida qué hacer al usarse
     public virtual bool Usar(GameObject jugador)
     {
