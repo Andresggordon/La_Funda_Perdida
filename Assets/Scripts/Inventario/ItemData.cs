@@ -1,16 +1,23 @@
 using UnityEngine;
 
-// Esta línea es la magia: crea un botón en el menú de Unity para fabricar objetos
-[CreateAssetMenu(fileName = "NuevoObjeto", menuName = "Inventario/Nuevo Objeto")]
+[CreateAssetMenu(fileName = "NuevoObjeto", menuName = "Inventario/Nuevo Objeto Base")]
 public class ItemData : ScriptableObject
 {
     [Header("Datos Básicos")]
-    public string idObjeto; // Un código único, ej: "funda_01" o "pocion_vida"
-    public string nombreMostrado; // El nombre que verá el jugador, ej: "Funda de Cuero"
+    public string idObjeto;
+    public string nombreMostrado;
 
     [TextArea(3, 5)]
-    public string descripcion; // Texto que explica qué hace
+    public string descripcion;
 
-    public Sprite icono; // La imagen que saldrá en la mochila
-    public bool esConsumible; // Para saber si se gasta al usarlo
+    public Sprite icono;
+    public bool esConsumible;
+
+    // Este método virtual permite que cada tipo de objeto decida qué hacer al usarse
+    public virtual bool Usar(GameObject jugador)
+    {
+        Debug.Log("Has interactuado con: " + nombreMostrado);
+        // Devuelve false por defecto indicando que no se gastó
+        return false;
+    }
 }

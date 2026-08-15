@@ -4,7 +4,7 @@ public class CargarDatosJugador : MonoBehaviour
 {
     [Header("Referencias")]
     public SaveManager saveManager;
-    public ItemDatabase baseDeDatosItems; // NUEVO: Arrastra aquí tu base de datos recién creada
+    public ItemDatabase baseDeDatosItems;
 
     private void Start()
     {
@@ -12,53 +12,50 @@ public class CargarDatosJugador : MonoBehaviour
 
         if (misDatos != null)
         {
-            // 1. Buscamos el Character Controller
             CharacterController controller = GetComponent<CharacterController>();
+            if (controller != null) controller.enabled = false;
 
-            // 2. Lo apagamos temporalmente para evitar tirones físicos
-            if (controller != null)
-            {
-                controller.enabled = false;
-            }
-
-            // 3. Aplicamos la posición guardada
             Vector3 posicionSegura = misDatos.posicionJugador;
             posicionSegura.y += 0.5f;
             transform.position = posicionSegura;
 
-            // 4. Lo volvemos a encender
-            if (controller != null)
-            {
-                controller.enabled = true;
-            }
-
+            if (controller != null) controller.enabled = true;
             Debug.Log("¡Jugador cargado correctamente en la posición: " + transform.position + "!");
         }
 
-        // Buscamos el inventario
         InventoryManager inventario = GetComponent<InventoryManager>();
 
         if (misDatos != null && inventario != null)
         {
-            // --- RECUPERAR LOS OBJETOS DESTRUIDOS AL CARGAR ---
             if (misDatos.objetosDestruidosUID != null)
             {
                 inventario.objetosDestruidosUID = misDatos.objetosDestruidosUID;
             }
 
-            // --- CARGAR INVENTARIO USANDO LA BASE DE DATOS ---
             if (misDatos.nombresObjetosInventario != null && baseDeDatosItems != null)
             {
-                inventario.objetosActuales.Clear();
-
-                foreach (string nombreItem in misDatos.nombresObjetosInventario)
+                // Seguridad: Si el array no está instanciado por algún motivo, lo creamos
+                if (inventario.slots == null || inventario.slots.Length != inventario.capacidadTotal)
                 {
-                    // Buscamos el objeto en nuestra Base de Datos personalizada
-                    ItemData objetoCargado = baseDeDatosItems.ObtenerItemPorNombre(nombreItem);
+                    inventario.slots = new ItemData[inventario.capacidadTotal];
+                }
 
-                    if (objetoCargado != null)
+                // Restauramos los objetos en su posición exacta del Grid
+                for (int i = 0; i < misDatos.nombresObjetosInventario.Count; i++)
+                {
+                    // Evitar errores si en el futuro decides ampliar la mochila
+                    if (i >= inventario.slots.Length) break;
+
+                    string nombreItem = misDatos.nombresObjetosInventario[i];
+
+                    if (!string.IsNullOrEmpty(nombreItem))
                     {
-                        inventario.objetosActuales.Add(objetoCargado);
+                        ItemData objetoCargado = baseDeDatosItems.ObtenerItemPorNombre(nombreItem);
+                        inventario.slots[i] = objetoCargado;
+                    }
+                    else
+                    {
+                        inventario.slots[i] = null; // Hueco vacío
                     }
                 }
             }

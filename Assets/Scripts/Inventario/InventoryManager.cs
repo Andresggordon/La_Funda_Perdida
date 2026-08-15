@@ -4,23 +4,40 @@ using UnityEngine;
 public class InventoryManager : MonoBehaviour
 {
     [Header("Mis Bolsillos")]
-    public List<ItemData> objetosActuales = new List<ItemData>();
+    public int capacidadTotal = 24; // 4 de Hotbar + 20 de mochila
+    public ItemData[] slots; // Array de tamaño fijo
 
     [Header("Estado del Mundo")]
-    // Guardamos aquí los IDs de las cosas que ya hemos destruido
     public List<string> objetosDestruidosUID = new List<string>();
+
+    private void Awake()
+    {
+        // Inicializamos la mochila vacía
+        slots = new ItemData[capacidadTotal];
+    }
 
     public void AnadirObjeto(ItemData nuevoObjeto)
     {
-        objetosActuales.Add(nuevoObjeto);
-        Debug.Log("Has recogido: " + nuevoObjeto.nombreMostrado);
+        // Buscamos el primer hueco libre (null)
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i] == null)
+            {
+                slots[i] = nuevoObjeto;
+                Debug.Log("Has recogido: " + nuevoObjeto.nombreMostrado + " en el slot " + i);
+                return; // Salimos de la función al guardarlo
+            }
+        }
+        Debug.LogWarning("¡El inventario está lleno!");
     }
 
-    public void QuitarObjeto(ItemData objetoAQuitar)
+    
+
+    // Función modular para intercambiar dos huecos (incluso si uno está vacío)
+    public void IntercambiarSlots(int indiceA, int indiceB)
     {
-        if (objetosActuales.Contains(objetoAQuitar))
-        {
-            objetosActuales.Remove(objetoAQuitar);
-        }
+        ItemData objetoTemporal = slots[indiceA];
+        slots[indiceA] = slots[indiceB];
+        slots[indiceB] = objetoTemporal;
     }
 }

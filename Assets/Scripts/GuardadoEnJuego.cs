@@ -4,7 +4,7 @@ public class GuardadoEnJuego : MonoBehaviour
 {
     [Header("Referencias")]
     public SaveManager saveManager;
-    public InventoryManager inventoryManager; // NUEVO: Para acceder a la lista de setas destruidas
+    public InventoryManager inventoryManager;
 
     [Header("Elementos a Guardar")]
     public Transform transformJugador;
@@ -13,7 +13,6 @@ public class GuardadoEnJuego : MonoBehaviour
 
     public void Click_GuardarPartida()
     {
-        // 1. Leemos los datos que ya existen
         DatosPartida datosActuales = saveManager.CargarPartida();
 
         if (datosActuales == null)
@@ -21,41 +20,35 @@ public class GuardadoEnJuego : MonoBehaviour
             datosActuales = new DatosPartida();
         }
 
-        // 2. Actualizamos los datos del jugador y cámara
-        if (transformJugador != null)
-        {
-            datosActuales.posicionJugador = transformJugador.position;
-        }
-
-        if (transformCamara != null)
-        {
-            datosActuales.posicionCamara = transformCamara.position;
-        }
+        if (transformJugador != null) datosActuales.posicionJugador = transformJugador.position;
+        if (transformCamara != null) datosActuales.posicionCamara = transformCamara.position;
 
         datosActuales.tipoPerspectiva = perspectivaActual;
 
-        // --- GUARDAR INVENTARIO ---
+        // --- GUARDAR INVENTARIO ESTRUCTURADO ---
         if (inventoryManager != null)
         {
             datosActuales.nombresObjetosInventario.Clear();
-            foreach (ItemData item in inventoryManager.objetosActuales)
+
+            // Recorremos los 24 slots exactos
+            for (int i = 0; i < inventoryManager.slots.Length; i++)
             {
+                ItemData item = inventoryManager.slots[i];
                 if (item != null)
                 {
-                    datosActuales.nombresObjetosInventario.Add(item.name); // Guardamos el nombre del archivo ItemData
+                    datosActuales.nombresObjetosInventario.Add(item.name);
+                }
+                else
+                {
+                    // Guardamos un texto vacío para recordar que este slot no tiene nada
+                    datosActuales.nombresObjetosInventario.Add("");
                 }
             }
-        }
 
-        // --- NUEVO: GUARDAR LA LISTA DE OBJETOS DESTRUIDOS ---
-        if (inventoryManager != null)
-        {
             datosActuales.objetosDestruidosUID = inventoryManager.objetosDestruidosUID;
         }
 
-        // 3. Guardamos todo en el disco duro
         saveManager.GuardarPartida(datosActuales);
-
-        Debug.Log("¡Partida guardada con éxito! Objetos destruidos guardados: " + datosActuales.objetosDestruidosUID.Count);
+        Debug.Log("¡Partida guardada con éxito! Objetos destruidos: " + datosActuales.objetosDestruidosUID.Count);
     }
 }
