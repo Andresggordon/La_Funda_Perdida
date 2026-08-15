@@ -16,6 +16,12 @@ public class ItemData : ScriptableObject
     [Tooltip("El modelo 3D que aparecerá en la mano o en el suelo al tirarlo")]
     public GameObject prefabMundo;
 
+    [Tooltip("Ajuste fino de la posición en la mano (X, Y, Z)")]
+    public Vector3 offsetPosicion;
+
+    [Tooltip("Ajuste fino de la rotación en la mano (X, Y, Z)")]
+    public Vector3 offsetRotacion;
+
     // Este método virtual permite que cada tipo de objeto decida qué hacer al usarse
     public virtual bool Usar(GameObject jugador)
     {

@@ -217,6 +217,15 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""TirarObjeto"",
+                    ""type"": ""Button"",
+                    ""id"": ""f55e9ea1-b1c2-4b01-90b1-be7cd099c7ad"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -527,6 +536,28 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
                     ""action"": ""Interactuar"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9ec1cdcf-0e70-42c5-a724-01bd1311c02b"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""TirarObjeto"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""59e5d6cf-7e06-4f1c-a969-80c82155b200"",
+                    ""path"": ""<Gamepad>/dpad/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""TirarObjeto"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -639,6 +670,7 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
         m_Jugador_NavegarDerecha = m_Jugador.FindAction("NavegarDerecha", throwIfNotFound: true);
         m_Jugador_NavegarIzquierda = m_Jugador.FindAction("NavegarIzquierda", throwIfNotFound: true);
         m_Jugador_Interactuar = m_Jugador.FindAction("Interactuar", throwIfNotFound: true);
+        m_Jugador_TirarObjeto = m_Jugador.FindAction("TirarObjeto", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Submit = m_UI.FindAction("Submit", throwIfNotFound: true);
@@ -739,6 +771,7 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
     private readonly InputAction m_Jugador_NavegarDerecha;
     private readonly InputAction m_Jugador_NavegarIzquierda;
     private readonly InputAction m_Jugador_Interactuar;
+    private readonly InputAction m_Jugador_TirarObjeto;
     /// <summary>
     /// Provides access to input actions defined in input action map "Jugador".
     /// </summary>
@@ -807,6 +840,10 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Interactuar => m_Wrapper.m_Jugador_Interactuar;
         /// <summary>
+        /// Provides access to the underlying input action "Jugador/TirarObjeto".
+        /// </summary>
+        public InputAction @TirarObjeto => m_Wrapper.m_Jugador_TirarObjeto;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Jugador; }
@@ -874,6 +911,9 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
             @Interactuar.started += instance.OnInteractuar;
             @Interactuar.performed += instance.OnInteractuar;
             @Interactuar.canceled += instance.OnInteractuar;
+            @TirarObjeto.started += instance.OnTirarObjeto;
+            @TirarObjeto.performed += instance.OnTirarObjeto;
+            @TirarObjeto.canceled += instance.OnTirarObjeto;
         }
 
         /// <summary>
@@ -927,6 +967,9 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
             @Interactuar.started -= instance.OnInteractuar;
             @Interactuar.performed -= instance.OnInteractuar;
             @Interactuar.canceled -= instance.OnInteractuar;
+            @TirarObjeto.started -= instance.OnTirarObjeto;
+            @TirarObjeto.performed -= instance.OnTirarObjeto;
+            @TirarObjeto.canceled -= instance.OnTirarObjeto;
         }
 
         /// <summary>
@@ -1183,6 +1226,13 @@ public partial class @ControlesJugador: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnInteractuar(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "TirarObjeto" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnTirarObjeto(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
