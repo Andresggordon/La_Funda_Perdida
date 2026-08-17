@@ -50,8 +50,10 @@ public class JugadorInteraccion : MonoBehaviour
 
         RaycastHit impacto;
 
+        // Lanzamos el rayo hacia la capa Interactuable
         if (Physics.Raycast(rayo, out impacto, distanciaInteraccion, capaInteractuable))
         {
+            // Verificamos si tiene el componente visual para pintarlo de amarillo[cite: 5]
             if (impacto.collider.TryGetComponent(out ObjetoInteractuable interactuable))
             {
                 if (interactuable != objetoMirado)
@@ -65,9 +67,11 @@ public class JugadorInteraccion : MonoBehaviour
                     objetoMirado = interactuable;
                     objetoMirado.ActivarResaltado();
 
-                    if (objetoMirado.TryGetComponent(out ObjetoRecogible recogible))
+                    // ¡LA MAGIA DE LA INTERFAZ! 
+                    // Si el objeto firma el contrato IInteractuable, mostramos la UI
+                    if (objetoMirado.TryGetComponent(out IInteractuable accionInteractuable))
                     {
-                        MostrarIcono(); // Solo mostramos el botón
+                        MostrarIcono();
                     }
                 }
             }
@@ -87,6 +91,7 @@ public class JugadorInteraccion : MonoBehaviour
     {
         bool botonPulsado = false;
 
+        // Comprobación dual de Inputs
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
             botonPulsado = true;
@@ -99,9 +104,12 @@ public class JugadorInteraccion : MonoBehaviour
 
         if (botonPulsado && objetoMirado != null)
         {
-            if (objetoMirado.TryGetComponent(out ObjetoRecogible recogible))
+            // Ejecutamos la acción genérica sin importar qué tipo de objeto sea
+            if (objetoMirado.TryGetComponent(out IInteractuable accionInteractuable))
             {
-                recogible.Recoger(miInventario);
+                accionInteractuable.EjecutarInteraccion(this.gameObject);
+
+                // Reseteamos el estado visual
                 objetoMirado = null;
                 OcultarUI();
             }

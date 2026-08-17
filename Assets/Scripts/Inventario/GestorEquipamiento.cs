@@ -6,13 +6,11 @@ public class GestorEquipamiento : MonoBehaviour
 {
     [Header("Referencias de Equipamiento")]
     public Transform socketManoDerecha;
+    public Animator animatorPaula; // NUEVO: Referencia al Animator de Paula
 
     [Header("Sistemas Conectados")]
-    [Tooltip("Arrastra aquí a tu jugador (donde esté el script InventoryManager)")]
     public InventoryManager inventoryManager;
-    [Tooltip("Arrastra aquí tu panel de la Hotbar (donde esté el script HotbarUI)")]
     public HotbarUI hotbarUI;
-    [Tooltip("Arrastra la cámara principal para saber hacia dónde lanzar el objeto")]
     public Transform camaraJugador;
 
     [Header("Ajustes de Físicas")]
@@ -21,14 +19,17 @@ public class GestorEquipamiento : MonoBehaviour
 
     private GameObject objetoEquipadoActual;
     private ItemData datosObjetoActual;
+    private bool estaLanzando = false;
 
     private void Update()
     {
+        if (estaLanzando) return; // Evitamos spam de inputs mientras lanza
+
         if (InputManager.Instancia != null && InputManager.Instancia.controles != null)
         {
             if (InputManager.Instancia.controles.Jugador.TirarObjeto.WasPressedThisFrame())
             {
-                LanzarObjetoActual();
+                IntentarLanzarObjeto();
             }
         }
     }
@@ -45,42 +46,56 @@ public class GestorEquipamiento : MonoBehaviour
 
         if (nuevoItem == null || nuevoItem.prefabMundo == null) return;
 
-        // 1. Instanciamos el modelo 3D en la mano
         objetoEquipadoActual = Instantiate(nuevoItem.prefabMundo, socketManoDerecha);
-
         objetoEquipadoActual.transform.localPosition = nuevoItem.offsetPosicion;
         objetoEquipadoActual.transform.localEulerAngles = nuevoItem.offsetRotacion;
 
-        // 2. CONFIGURACIÓN COSMÉTICA (En mano):
-        Rigidbody rb = objetoEquipadoActual.GetComponent<Rigidbody>();
-        if (rb != null) rb.isKinematic = true;
-
-        // Desactivamos colliders mientras se lleva en la mano
-        Collider[] colliders = objetoEquipadoActual.GetComponentsInChildren<Collider>();
-        foreach (Collider col in colliders)
-        {
-            col.enabled = false;
-        }
-
-        // Apagamos scripts lógicos de mundo mientras esté equipada
-        MonoBehaviour[] scriptsMundo = objetoEquipadoActual.GetComponentsInChildren<MonoBehaviour>();
-        foreach (MonoBehaviour script in scriptsMundo)
-        {
-            if (script is ObjetoRecogible || script is ObjetoInteractuable || script is ItemFisicoFrenado)
-            {
-                script.enabled = false;
-            }
-        }
+        ConfigurarObjetoComoMano(objetoEquipadoActual, true);
     }
 
-    private void LanzarObjetoActual()
+    private void IntentarLanzarObjeto()
     {
         if (datosObjetoActual == null || datosObjetoActual.prefabMundo == null || inventoryManager == null || hotbarUI == null) return;
 
-        // 1. Instanciamos el clon físico en la posición de la mano
+        estaLanzando = true;
+
+        // 1. Ocultamos el objeto visualmente de la mano mientras se prepara el gesto
+        if (objetoEquipadoActual != null)
+        {
+            objetoEquipadoActual.SetActive(false);
+        }
+
+        // 2. Activamos el Trigger en el Animator para que Paula empiece a mover el brazo
+        if (animatorPaula != null)
+        {
+            animatorPaula.SetTrigger("Lanzar");
+        }
+        else
+        {
+            // Si por algún motivo no hay Animator asignado, lanzamos al instante por seguridad
+            EjecutarDisparoFisico();
+        }
+    }
+
+    // --- ESTE MÉTODO ES LLAMADO POR EL ANIMATION EVENT EN EL FRAME EXACTO ---
+    public void EjecutarDisparoFisico()
+    {
+        if (datosObjetoActual == null || datosObjetoActual.prefabMundo == null)
+        {
+            estaLanzando = false;
+            return;
+        }
+
+        // 1. Destruimos el objeto fantasma de la mano
+        if (objetoEquipadoActual != null)
+        {
+            Destroy(objetoEquipadoActual);
+        }
+
+        // 2. Instanciamos el clon físico en la posición de la mano
         GameObject objetoLanzado = Instantiate(datosObjetoActual.prefabMundo, socketManoDerecha.position, socketManoDerecha.rotation);
 
-        // 2. ACTIVACIÓN FÍSICA Y DE MUNDO:
+        // 3. Activación física
         Rigidbody rb = objetoLanzado.GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -108,7 +123,7 @@ public class GestorEquipamiento : MonoBehaviour
             }
         }
 
-        // 3. Disparar el objeto hacia adelante
+        // 4. Disparar el objeto hacia adelante
         if (rb != null)
         {
             Vector3 direccionDisparo = camaraJugador != null ? camaraJugador.forward : transform.forward;
@@ -116,9 +131,37 @@ public class GestorEquipamiento : MonoBehaviour
             rb.AddTorque(new Vector3(Random.Range(-5f, 5f), Random.Range(-5f, 5f), Random.Range(-5f, 5f)), ForceMode.Impulse);
         }
 
-        // 4. Vaciar el slot de la Hotbar / Inventario
+        // 5. Vaciar el slot de la Hotbar / Inventario
         int slotActivo = hotbarUI.ObtenerIndiceSlotActivo();
         inventoryManager.slots[slotActivo] = null;
+
+        estaLanzando = false;
+    }
+
+    private void ConfigurarObjetoComomano(GameObject obj, bool enMano)
+    {
+        Rigidbody rb = obj.GetComponent<Rigidbody>();
+        if (rb != null) rb.isKinematic = enMano;
+
+        Collider[] colliders = obj.GetComponentsInChildren<Collider>();
+        foreach (Collider col in colliders)
+        {
+            col.enabled = !enMano;
+        }
+
+        MonoBehaviour[] scriptsMundo = obj.GetComponentsInChildren<MonoBehaviour>();
+        foreach (MonoBehaviour script in scriptsMundo)
+        {
+            if (script is ObjetoRecogible || script is ObjetoInteractuable || script is ItemFisicoFrenado)
+            {
+                script.enabled = !enMano;
+            }
+        }
+    }
+
+    private void ConfigurarObjetoComoMano(GameObject obj, bool enMano)
+    {
+        ConfigurarObjetoComomano(obj, enMano);
     }
 
     private IEnumerator ActivarRecogidaConRetraso(GameObject objetoLanzado)
@@ -132,7 +175,6 @@ public class GestorEquipamiento : MonoBehaviour
         }
     }
 
-    // --- MÉTODO REQUERIDO POR HOTBARUI ---
     public ItemData ObtenerItemEquipado()
     {
         return datosObjetoActual;
