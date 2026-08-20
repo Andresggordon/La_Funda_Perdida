@@ -2,27 +2,37 @@ using UnityEngine;
 
 public class JugadorCamara : MonoBehaviour
 {
-    [Header("Referencias (¡Arrastrar desde Unity!)")]
+    [Header("Referencias")]
     [SerializeField] private Transform cuelloCamara;
     [SerializeField] private Transform camaraJugador;
 
     [Header("Ajustes de Visión")]
     [SerializeField] private float sensibilidad = 80f;
 
-    [Header("Sistema de Cámaras")]
-    [SerializeField] private Vector3 posPrimeraPersona = new Vector3(0f, 0f, 0f);
+    [Header("Sistema de Cámaras (Offsets relativos al Cuello)")]
+    // Quitamos los valores por defecto aquí. Los leeremos del Editor automáticamente.
+    [SerializeField] private Vector3 posPrimeraPersona;
     [SerializeField] private Vector3 posTerceraPersona = new Vector3(1.2f, 2f, -5f);
     [SerializeField] private Vector3 posVistaFrontal = new Vector3(0f, 0.3f, 5f);
 
     private float rotacionX = 0f;
     public int estadoCamara = 0;
 
-    // Hemos eliminado la variable 'controles', el 'Awake', el 'OnEnable' y el 'OnDisable'
+    private void Awake()
+    {
+        // LA MAGIA: Guardamos la posición exacta en la que TÚ dejaste la cámara en el modo Edición.
+        // Así nunca saldrá volando ni ignorará tus ajustes manuales.
+        if (camaraJugador != null)
+        {
+            posPrimeraPersona = camaraJugador.localPosition;
+        }
+    }
 
     private void Start()
     {
         if (camaraJugador != null)
         {
+            // Aseguramos que empiece en el estado correcto (Primera persona)
             camaraJugador.localPosition = posPrimeraPersona;
             camaraJugador.localRotation = Quaternion.identity;
         }
@@ -30,7 +40,7 @@ public class JugadorCamara : MonoBehaviour
 
     private void Update()
     {
-        if (Time.timeScale == 0f) return; // Si hay pausa, la cámara no gira
+        if (Time.timeScale == 0f) return;
 
         ManejarVistas();
         ManejarRotacion();
@@ -38,7 +48,6 @@ public class JugadorCamara : MonoBehaviour
 
     private void ManejarVistas()
     {
-        // Leemos el botón de cambiar cámara desde el InputManager centralizado
         if (InputManager.Instancia.controles.Jugador.CambiarCamara.WasPressedThisFrame())
         {
             if (camaraJugador == null) return;
@@ -49,7 +58,7 @@ public class JugadorCamara : MonoBehaviour
             switch (estadoCamara)
             {
                 case 0:
-                    camaraJugador.localPosition = posPrimeraPersona;
+                    camaraJugador.localPosition = posPrimeraPersona; // Usa tu ajuste perfecto del editor
                     camaraJugador.localRotation = Quaternion.Euler(0f, 0f, 0f);
                     break;
                 case 1:
@@ -66,7 +75,6 @@ public class JugadorCamara : MonoBehaviour
 
     private void ManejarRotacion()
     {
-        // Leemos el movimiento del ratón desde el InputManager centralizado
         Vector2 inputMirar = InputManager.Instancia.controles.Jugador.Mirar.ReadValue<Vector2>();
 
         float ratonX = inputMirar.x * sensibilidad * Time.deltaTime;
@@ -80,10 +88,9 @@ public class JugadorCamara : MonoBehaviour
             cuelloCamara.localRotation = Quaternion.Euler(rotacionX, 0f, 0f);
         }
 
-        transform.Rotate(Vector3.up * ratonX); // Gira el cuerpo entero a los lados
+        transform.Rotate(Vector3.up * ratonX);
     }
 
-    // Función pública para que el menú pueda modificar la sensibilidad
     public void CambiarSensibilidad(float nuevaSensibilidad)
     {
         sensibilidad = nuevaSensibilidad;
