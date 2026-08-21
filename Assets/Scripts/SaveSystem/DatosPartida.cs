@@ -10,7 +10,7 @@ public class DatosPartida
 
     // --- DATOS DE LA CÁMARA Y PERSPECTIVA ---
     public Vector3 posicionCamara;
-    public int tipoPerspectiva; // Por ejemplo: 0 = Primera persona, 1 = Tercera persona, etc.
+    public int tipoPerspectiva;
 
     // --- DATOS DE LA MASCOTA ---
     public string nombreMascota;
@@ -18,14 +18,19 @@ public class DatosPartida
 
     // --- INVENTARIO ---
     public List<string> objetosInventario;
-    public List<string> objetosDestruidosUID; // Guardará identificadores únicos de los objetos cogidos
-    public List<string> nombresObjetosInventario;  // Guardaremos los nombres de los objetos que tienes en el inventario
+    public List<string> objetosDestruidosUID;
+    public List<string> nombresObjetosInventario;
+
+    // --- MUNDO E IA ---
+    public List<string> entidadesDerrotadasUID;
+
+    // --- ENTORNO (¡NUEVO!) ---
+    public float horaDelMundo;
 
     // --- CONSTRUCTOR: VALORES POR DEFECTO ---
     public DatosPartida()
     {
         corazonesJugador = 4;
-        // Pon aquí unas coordenadas aproximadas de donde está tu terreno
         posicionJugador = new Vector3(50.8f, 71.2f, 93.7f);
 
         posicionCamara = Vector3.zero;
@@ -36,7 +41,10 @@ public class DatosPartida
 
         objetosInventario = new List<string>();
         objetosDestruidosUID = new List<string>();
-
         nombresObjetosInventario = new List<string>();
+        entidadesDerrotadasUID = new List<string>();
+
+        // Por defecto, si empezamos una partida nueva, será a mediodía
+        horaDelMundo = 12f;
     }
 }

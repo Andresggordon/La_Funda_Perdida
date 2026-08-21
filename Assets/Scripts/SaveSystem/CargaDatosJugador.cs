@@ -60,5 +60,12 @@ public class CargarDatosJugador : MonoBehaviour
                 }
             }
         }
+
+        // --- ¡NUEVO! CARGAR LA HORA DEL MUNDO ---
+        if (misDatos != null && GestorTiempoMundo.Instancia != null)
+        {
+            GestorTiempoMundo.Instancia.horaActual = misDatos.horaDelMundo;
+            // No te preocupes por la rotación, el Update de GestorTiempoMundo la actualizará en el frame 1
+        }
     }
 }

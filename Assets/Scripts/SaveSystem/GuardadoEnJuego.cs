@@ -30,25 +30,42 @@ public class GuardadoEnJuego : MonoBehaviour
         {
             datosActuales.nombresObjetosInventario.Clear();
 
-            // Recorremos los 24 slots exactos
             for (int i = 0; i < inventoryManager.slots.Length; i++)
             {
                 ItemData item = inventoryManager.slots[i];
-                if (item != null)
-                {
-                    datosActuales.nombresObjetosInventario.Add(item.name);
-                }
-                else
-                {
-                    // Guardamos un texto vacío para recordar que este slot no tiene nada
-                    datosActuales.nombresObjetosInventario.Add("");
-                }
+                if (item != null) datosActuales.nombresObjetosInventario.Add(item.name);
+                else datosActuales.nombresObjetosInventario.Add("");
             }
 
             datosActuales.objetosDestruidosUID = inventoryManager.objetosDestruidosUID;
         }
 
+        // --- ¡NUEVO! GUARDAR ESTADO DEL MUNDO (SPAWNERS) ---
+        datosActuales.entidadesDerrotadasUID.Clear();
+
+        // Buscamos todos los spawners del mapa (operación segura al guardar porque el juego suele pausarse)
+        PuntoGeneracion[] todosLosSpawners = FindObjectsByType<PuntoGeneracion>(FindObjectsSortMode.None);
+
+        foreach (PuntoGeneracion spawner in todosLosSpawners)
+        {
+            // Si el spawner detectó que su mob murió, guardamos su ID
+            if (spawner.enemigoDerrotado)
+            {
+                IdentificadorObjeto idSpawner = spawner.GetComponent<IdentificadorObjeto>();
+                if (idSpawner != null && !string.IsNullOrEmpty(idSpawner.idUnico))
+                {
+                    datosActuales.entidadesDerrotadasUID.Add(idSpawner.idUnico);
+                }
+            }
+        }
+
         saveManager.GuardarPartida(datosActuales);
-        Debug.Log("¡Partida guardada con éxito! Objetos destruidos: " + datosActuales.objetosDestruidosUID.Count);
+        Debug.Log("¡Partida guardada con éxito! Entidades derrotadas: " + datosActuales.entidadesDerrotadasUID.Count);
+
+        // --- ¡NUEVO! GUARDAR LA HORA DEL MUNDO ---
+        if (GestorTiempoMundo.Instancia != null)
+        {
+            datosActuales.horaDelMundo = GestorTiempoMundo.Instancia.horaActual;
+        }
     }
 }
