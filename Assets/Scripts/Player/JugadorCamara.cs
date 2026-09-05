@@ -30,12 +30,7 @@ public class JugadorCamara : MonoBehaviour
 
     private void Start()
     {
-        if (camaraJugador != null)
-        {
-            // Aseguramos que empiece en el estado correcto (Primera persona)
-            camaraJugador.localPosition = posPrimeraPersona;
-            camaraJugador.localRotation = Quaternion.identity;
-        }
+        AplicarEstadoCamara(estadoCamara);
     }
 
     private void Update()
@@ -54,22 +49,7 @@ public class JugadorCamara : MonoBehaviour
 
             estadoCamara++;
             if (estadoCamara > 2) estadoCamara = 0;
-
-            switch (estadoCamara)
-            {
-                case 0:
-                    camaraJugador.localPosition = posPrimeraPersona; // Usa tu ajuste perfecto del editor
-                    camaraJugador.localRotation = Quaternion.Euler(0f, 0f, 0f);
-                    break;
-                case 1:
-                    camaraJugador.localPosition = posTerceraPersona;
-                    camaraJugador.localRotation = Quaternion.Euler(0f, 0f, 0f);
-                    break;
-                case 2:
-                    camaraJugador.localPosition = posVistaFrontal;
-                    camaraJugador.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                    break;
-            }
+            AplicarEstadoCamara(estadoCamara);
         }
     }
 
@@ -89,6 +69,28 @@ public class JugadorCamara : MonoBehaviour
         }
 
         transform.Rotate(Vector3.up * ratonX);
+    }
+
+    public void AplicarEstadoCamara(int estado)
+    {
+        estadoCamara = Mathf.Clamp(estado, 0, 2);
+        if (camaraJugador == null) return;
+
+        switch (estadoCamara)
+        {
+            case 0:
+                camaraJugador.localPosition = posPrimeraPersona;
+                camaraJugador.localRotation = Quaternion.Euler(0f, 0f, 0f);
+                break;
+            case 1:
+                camaraJugador.localPosition = posTerceraPersona;
+                camaraJugador.localRotation = Quaternion.Euler(0f, 0f, 0f);
+                break;
+            case 2:
+                camaraJugador.localPosition = posVistaFrontal;
+                camaraJugador.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                break;
+        }
     }
 
     public void CambiarSensibilidad(float nuevaSensibilidad)

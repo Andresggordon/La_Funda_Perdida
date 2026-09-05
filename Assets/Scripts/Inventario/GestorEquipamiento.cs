@@ -31,7 +31,42 @@ public class GestorEquipamiento : MonoBehaviour
             {
                 IntentarLanzarObjeto();
             }
+
+            if (SeHaPulsadoUsar())
+            {
+                IntentarUsarObjeto();
+            }
         }
+    }
+
+    private static bool SeHaPulsadoUsar()
+    {
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            return true;
+
+        if (Gamepad.current != null && Gamepad.current.buttonNorth.wasPressedThisFrame)
+            return true;
+
+        return false;
+    }
+
+    private void IntentarUsarObjeto()
+    {
+        if (Time.timeScale == 0f) return;
+        if (datosObjetoActual == null || inventoryManager == null || hotbarUI == null) return;
+
+        bool seConsumio = datosObjetoActual.Usar(gameObject);
+        if (!seConsumio) return;
+
+        int slotActivo = hotbarUI.ObtenerIndiceSlotActivo();
+        if (slotActivo >= 0 && slotActivo < inventoryManager.slots.Length)
+            inventoryManager.slots[slotActivo] = null;
+
+        if (objetoEquipadoActual != null)
+            Destroy(objetoEquipadoActual);
+
+        objetoEquipadoActual = null;
+        datosObjetoActual = null;
     }
 
     public void EquiparObjeto(ItemData nuevoItem)

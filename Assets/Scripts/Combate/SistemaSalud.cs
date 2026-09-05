@@ -7,8 +7,11 @@ using UnityEngine;
 public class SistemaSalud : MonoBehaviour, IRecibeDano
 {
     [Header("Configuración Base")]
-    [SerializeField] private int saludMaxima = 100;
+    [SerializeField] private int saludMaxima = 5;
     private int saludActual;
+
+    public int SaludActual => saludActual;
+    public int SaludMaxima => saludMaxima;
 
     // --- EVENTOS (La clave del desacoplamiento) ---
     // Otros scripts (como la UI de corazones o el Animator del enemigo) se suscribirán aquí
@@ -51,6 +54,13 @@ public class SistemaSalud : MonoBehaviour, IRecibeDano
         // Evitamos sobrecurar por encima del máximo
         saludActual = Mathf.Min(saludActual, saludMaxima);
 
+        AlCambiarSalud?.Invoke(saludActual, saludMaxima);
+    }
+
+    public void RestaurarSalud(int cantidad)
+    {
+        saludActual = Mathf.Clamp(cantidad, 0, saludMaxima);
+        estaMuerto = saludActual <= 0;
         AlCambiarSalud?.Invoke(saludActual, saludMaxima);
     }
 

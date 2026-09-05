@@ -8,20 +8,16 @@ public class ItemConsumible : ItemData
     public int corazonesARecuperar = 1;
     public AudioClip sonidoAlConsumir;
 
-    // Sobrescribimos la acción "Usar"
     public override bool Usar(GameObject jugador)
     {
-        Debug.Log("Paula ha consumido " + nombreMostrado + " y recuperó " + corazonesARecuperar + " corazones.");
+        if (jugador == null || !jugador.TryGetComponent(out SistemaSalud salud))
+            return false;
 
-        // Aquí conectaremos más adelante tu script de Vida/Corazones de Paula
-        // jugador.GetComponent<SaludJugador>().Curar(corazonesARecuperar);
+        salud.Curar(corazonesARecuperar);
 
         if (sonidoAlConsumir != null)
-        {
             AudioSource.PlayClipAtPoint(sonidoAlConsumir, jugador.transform.position);
-        }
 
-        // Devolvemos true para decirle al inventario que este objeto debe borrarse (se gastó)
         return true;
     }
 }

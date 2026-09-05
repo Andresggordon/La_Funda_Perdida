@@ -20,10 +20,24 @@ public class GuardadoEnJuego : MonoBehaviour
             datosActuales = new DatosPartida();
         }
 
-        if (transformJugador != null) datosActuales.posicionJugador = transformJugador.position;
-        if (transformCamara != null) datosActuales.posicionCamara = transformCamara.position;
+        if (transformJugador != null)
+        {
+            datosActuales.posicionJugador = transformJugador.position;
 
-        datosActuales.tipoPerspectiva = perspectivaActual;
+            if (transformJugador.TryGetComponent(out SistemaSalud saludJugador))
+                datosActuales.corazonesJugador = saludJugador.SaludActual;
+
+            if (transformJugador.TryGetComponent(out JugadorCamara camaraJugador))
+                datosActuales.tipoPerspectiva = camaraJugador.estadoCamara;
+            else
+                datosActuales.tipoPerspectiva = perspectivaActual;
+        }
+        else
+        {
+            datosActuales.tipoPerspectiva = perspectivaActual;
+        }
+
+        if (transformCamara != null) datosActuales.posicionCamara = transformCamara.position;
 
         // --- GUARDAR INVENTARIO ESTRUCTURADO ---
         if (inventoryManager != null)
@@ -59,13 +73,10 @@ public class GuardadoEnJuego : MonoBehaviour
             }
         }
 
+        if (GestorTiempoMundo.Instancia != null)
+            datosActuales.horaDelMundo = GestorTiempoMundo.Instancia.horaActual;
+
         saveManager.GuardarPartida(datosActuales);
         Debug.Log("¡Partida guardada con éxito! Entidades derrotadas: " + datosActuales.entidadesDerrotadasUID.Count);
-
-        // --- ¡NUEVO! GUARDAR LA HORA DEL MUNDO ---
-        if (GestorTiempoMundo.Instancia != null)
-        {
-            datosActuales.horaDelMundo = GestorTiempoMundo.Instancia.horaActual;
-        }
     }
 }

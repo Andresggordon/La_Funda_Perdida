@@ -1,14 +1,16 @@
 using UnityEngine;
 
-// Firmamos el contrato IInteractuable
 public class ObjetoRecogible : MonoBehaviour, IInteractuable
 {
-    [Header("¿Qué objeto es este?")]
-    public ItemData datosDelObjeto; // Basado en ScriptableObjects[cite: 1, 2]
+    [Header("Tipo de Objeto")]
+    [Tooltip("Asigna aquí el ScriptableObject si es un objeto de inventario normal.")]
+    public ItemData datosDelObjeto;
+
+    [Tooltip("Asigna aquí el ScriptableObject si este objeto es un Trofeo de Galería.")]
+    public TrofeoData datosDelTrofeo;
 
     private void Start()
     {
-        // Consultamos al SaveManager al nacer[cite: 6]
         SaveManager saveManager = FindFirstObjectByType<SaveManager>();
         IdentificadorObjeto idObjeto = GetComponent<IdentificadorObjeto>();
 
@@ -25,18 +27,50 @@ public class ObjetoRecogible : MonoBehaviour, IInteractuable
         }
     }
 
-    // El contrato nos obliga a usar este nombre exacto para la función
     public void EjecutarInteraccion(GameObject jugador)
     {
         InventoryManager inventarioJugador = jugador.GetComponent<InventoryManager>();
+        IdentificadorObjeto idObjeto = GetComponent<IdentificadorObjeto>();
 
-        if (inventarioJugador != null)
+        // 1. Caso: Es un Coleccionable / Trofeo
+        if (datosDelTrofeo != null)
         {
-            // 1. Lo metemos en el inventario
+            SaveManager saveManager = FindFirstObjectByType<SaveManager>();
+            if (saveManager != null)
+            {
+                DatosPartida datos = saveManager.CargarPartida() ?? new DatosPartida();
+
+                if (!datos.trofeosDesbloqueadosID.Contains(datosDelTrofeo.trophyID))
+                {
+                    datos.trofeosDesbloqueadosID.Add(datosDelTrofeo.trophyID);
+                }
+
+                if (idObjeto != null && !string.IsNullOrEmpty(idObjeto.idUnico))
+                {
+                    if (!datos.objetosDestruidosUID.Contains(idObjeto.idUnico))
+                    {
+                        datos.objetosDestruidosUID.Add(idObjeto.idUnico);
+                    }
+                    
+                    if (inventarioJugador != null && !inventarioJugador.objetosDestruidosUID.Contains(idObjeto.idUnico))
+                    {
+                        inventarioJugador.objetosDestruidosUID.Add(idObjeto.idUnico);
+                    }
+                }
+
+                saveManager.GuardarPartida(datos);
+                Debug.Log("<color=yellow>[Coleccionable Desbloqueado]</color> " + datosDelTrofeo.trophyName);
+            }
+
+            Destroy(gameObject);
+            return;
+        }
+
+        // 2. Caso: Es un Objeto común de Inventario
+        if (datosDelObjeto != null && inventarioJugador != null)
+        {
             inventarioJugador.AnadirObjeto(datosDelObjeto);
 
-            // 2. Apuntamos nuestro ID en la lista del inventario
-            IdentificadorObjeto idObjeto = GetComponent<IdentificadorObjeto>();
             if (idObjeto != null && !string.IsNullOrEmpty(idObjeto.idUnico))
             {
                 if (!inventarioJugador.objetosDestruidosUID.Contains(idObjeto.idUnico))
@@ -45,7 +79,6 @@ public class ObjetoRecogible : MonoBehaviour, IInteractuable
                 }
             }
 
-            // 3. Desaparece del suelo
             Destroy(gameObject);
         }
     }
