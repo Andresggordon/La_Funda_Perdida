@@ -27,6 +27,7 @@ public class MenuInventario : MonoBehaviour
     [Header("Vista 3D Personaje")]
     public GameObject camaraInventario3D; // Arrastra aquí la cámara que acabamos de crear
     public ControladorMiradaInventario controladorMirada; // Arrastra aquí el modelo de Paula
+    public Camera camaraPrincipal; // NUEVO: Para cegarla temporalmente y no ver el pelo por dentro
 
 
     private void Start()
@@ -185,6 +186,12 @@ public class MenuInventario : MonoBehaviour
         if (camaraInventario3D != null) camaraInventario3D.SetActive(true);
         if (controladorMirada != null) controladorMirada.rastrearRaton = true;
 
+        // Ocultamos el cuerpo de Paula en la cámara principal (fondo)
+        if (camaraPrincipal != null)
+        {
+            camaraPrincipal.cullingMask &= ~(1 << LayerMask.NameToLayer("Jugador"));
+        }
+
         if (iconoObjetoEnMano != null) iconoObjetoEnMano.transform.SetAsLastSibling();
         RefrescarVisuales();
     }
@@ -207,6 +214,12 @@ public class MenuInventario : MonoBehaviour
         // --- NUEVO: Desactivamos la vista 3D ---
         if (camaraInventario3D != null) camaraInventario3D.SetActive(false);
         if (controladorMirada != null) controladorMirada.rastrearRaton = false;
+
+        // Le devolvemos la vista del cuerpo a la cámara principal
+        if (camaraPrincipal != null)
+        {
+            camaraPrincipal.cullingMask |= (1 << LayerMask.NameToLayer("Jugador"));
+        }
 
         RefrescarVisuales();
     }

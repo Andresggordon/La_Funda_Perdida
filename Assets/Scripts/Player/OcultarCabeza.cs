@@ -21,18 +21,18 @@ public class OcultarCabeza : MonoBehaviour
         }
     }
 
-    void LateUpdate()
+   void LateUpdate()
     {
         if (huesoCabeza != null && scriptCamara != null)
         {
-            // Si el estado coincide con la primera persona, encogemos
-            if (scriptCamara.estadoCamara == estadoPrimeraPersona)
+            // Si estamos en 1ª persona Y el juego NO está pausado (inventario cerrado)
+            if (scriptCamara.estadoCamara == estadoPrimeraPersona && Time.timeScale > 0f)
             {
                 huesoCabeza.localScale = Vector3.zero;
             }
-            // Si cambiamos a tercera persona, devolvemos su tamaño original
             else
             {
+                // Si pasamos a 3ª persona O abrimos el inventario, devolvemos la cabeza
                 huesoCabeza.localScale = tamañoOriginal;
             }
         }
