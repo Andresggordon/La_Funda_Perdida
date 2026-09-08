@@ -5,9 +5,9 @@ using UnityEngine;
 public class ItemDatabase : ScriptableObject
 {
     [Header("Lista de todos los objetos existentes en el juego")]
-    public List<ItemData> itemsDisponibles;
+    // 1. Inicializamos la lista por defecto para evitar nulos al crear el archivo
+    public List<ItemData> itemsDisponibles = new List<ItemData>(); 
 
-    // Diccionario interno para búsquedas instantáneas
     private Dictionary<string, ItemData> diccionarioItems;
 
     private void OnEnable()
@@ -19,9 +19,11 @@ public class ItemDatabase : ScriptableObject
     {
         diccionarioItems = new Dictionary<string, ItemData>();
 
+        // 2. PROTECCIÓN: Si la lista sigue siendo nula por algún motivo, abortamos.
+        if (itemsDisponibles == null) return; 
+
         foreach (ItemData item in itemsDisponibles)
         {
-            // Evitamos errores si hay huecos vacíos o elementos duplicados por accidente
             if (item != null && !diccionarioItems.ContainsKey(item.name))
             {
                 diccionarioItems.Add(item.name, item);
@@ -29,22 +31,19 @@ public class ItemDatabase : ScriptableObject
         }
     }
 
-    // Función optimizada para buscar un objeto por su nombre
     public ItemData ObtenerItemPorNombre(string nombre)
     {
-        // Seguro de vida: Si el diccionario no está listo, lo inicializamos
-        if (diccionarioItems == null || diccionarioItems.Count != itemsDisponibles.Count)
+        if (diccionarioItems == null || itemsDisponibles == null || diccionarioItems.Count != itemsDisponibles.Count)
         {
             InicializarDiccionario();
         }
 
-        // TryGetValue encuentra el ítem al instante sin recorrer listas
-        if (diccionarioItems.TryGetValue(nombre, out ItemData itemEncontrado))
+        if (diccionarioItems != null && diccionarioItems.TryGetValue(nombre, out ItemData itemEncontrado))
         {
             return itemEncontrado;
         }
 
-        Debug.LogWarning("El ítem '" + nombre + "' no existe en la base de datos ItemDatabase.");
+        Debug.LogWarning("El ítem '" + nombre + "' no existe en la base de datos.");
         return null;
     }
 }

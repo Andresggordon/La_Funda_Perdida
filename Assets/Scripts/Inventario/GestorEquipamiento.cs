@@ -81,9 +81,13 @@ public class GestorEquipamiento : MonoBehaviour
 
         if (nuevoItem == null || nuevoItem.prefabMundo == null) return;
 
+        // Instanciamos el objeto en la mano
         objetoEquipadoActual = Instantiate(nuevoItem.prefabMundo, socketManoDerecha);
+        
+        // Aplicamos los 3 offsets (Posición, Rotación y la NUEVA ESCALA)
         objetoEquipadoActual.transform.localPosition = nuevoItem.offsetPosicion;
         objetoEquipadoActual.transform.localEulerAngles = nuevoItem.offsetRotacion;
+        objetoEquipadoActual.transform.localScale = nuevoItem.offsetEscala; 
 
         ConfigurarObjetoComoMano(objetoEquipadoActual, true);
     }

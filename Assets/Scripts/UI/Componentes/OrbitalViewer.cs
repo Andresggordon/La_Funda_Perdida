@@ -4,9 +4,10 @@ using UnityEngine.InputSystem;
 public class OrbitalViewer : MonoBehaviour
 {
     [Header("Ajustes de Rotación")]
-    public float velocidadRaton = 0.2f;
-    public float velocidadGamepad = 120f;
-    public Transform targetToRotate;
+    public float velocidadRaton = 0.5f;
+    public float velocidadGamepad = 150f;
+    
+    private Transform targetToRotate;
 
     private void Update()
     {
@@ -15,7 +16,7 @@ public class OrbitalViewer : MonoBehaviour
         float deltaX = 0f;
         float deltaY = 0f;
 
-        // 1. Ratón (Manteniendo clic izquierdo)
+        // Soporte Ratón (Clic izquierdo mantenido)
         if (Mouse.current != null && Mouse.current.leftButton.isPressed)
         {
             Vector2 mouseDelta = Mouse.current.delta.ReadValue();
@@ -23,7 +24,7 @@ public class OrbitalViewer : MonoBehaviour
             deltaY += mouseDelta.y * velocidadRaton;
         }
 
-        // 2. Mando PS4 (Stick Derecho / Acción Mirar)
+        // Soporte Mando PS4 (Stick Derecho)
         if (Gamepad.current != null)
         {
             Vector2 stickDelta = Gamepad.current.rightStick.ReadValue();
@@ -34,7 +35,7 @@ public class OrbitalViewer : MonoBehaviour
         if (Mathf.Abs(deltaX) > 0.001f || Mathf.Abs(deltaY) > 0.001f)
         {
             targetToRotate.Rotate(Vector3.up, -deltaX, Space.World);
-            targetToRotate.Rotate(Camera.main != null ? Camera.main.transform.right : Vector3.right, deltaY, Space.World);
+            targetToRotate.Rotate(Camera.main.transform.right, deltaY, Space.World);
         }
     }
 

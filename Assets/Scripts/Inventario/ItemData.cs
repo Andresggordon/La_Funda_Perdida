@@ -22,11 +22,13 @@ public class ItemData : ScriptableObject
     [Tooltip("Ajuste fino de la rotación en la mano (X, Y, Z)")]
     public Vector3 offsetRotacion;
 
-    // Este método virtual permite que cada tipo de objeto decida qué hacer al usarse
+    // --- NUEVO: Ajuste fino de la escala en la mano ---
+    [Tooltip("Ajuste fino de la escala en la mano. Por defecto es 1, 1, 1")]
+    public Vector3 offsetEscala = Vector3.one; 
+
     public virtual bool Usar(GameObject jugador)
     {
         Debug.Log("Has interactuado con: " + nombreMostrado);
-        // Devuelve false por defecto indicando que no se gastó
         return false;
     }
 }

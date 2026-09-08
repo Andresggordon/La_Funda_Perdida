@@ -18,12 +18,13 @@ public class BotonAnimado : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     private Vector3 posicionOriginal;
     private Coroutine animacionActual;
     private AudioSource audioSource;
-    private bool estaSeleccionado = false; // Control de seguridad añadido
+    private bool estaSeleccionado = false;
 
     private void Start()
     {
         escalaOriginal = transform.localScale;
-        posicionOriginal = transform.localPosition;
+        
+        // ELIMINADO: Ya no guardamos la posicionOriginal aquí para evitar conflictos con el GridLayoutGroup.
 
         audioSource = GetComponent<AudioSource>();
         audioSource.playOnAwake = false;
@@ -33,17 +34,18 @@ public class BotonAnimado : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     // --- RATÓN: Entrar ---
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // ¡LA SOLUCIÓN! Obligamos al mando a enfocarse en lo que toca el ratón
         EventSystem.current.SetSelectedGameObject(this.gameObject);
     }
 
     // --- RATÓN: Salir ---
     public void OnPointerExit(PointerEventData eventData)
     {
-        // Al quitar el ratón, soltamos el botón para que Unity lo devuelva a su color normal
-        EventSystem.current.SetSelectedGameObject(null);
+        // Añadimos la comprobación de seguridad (EventSystem.current != null)
+        if (EventSystem.current != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+        }
     }
-
     // --- JOYSTICK / TECLADO: Seleccionado ---
     public void OnSelect(BaseEventData eventData)
     {
@@ -81,17 +83,23 @@ public class BotonAnimado : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         if (animacionActual != null) StopCoroutine(animacionActual);
         animacionActual = StartCoroutine(AnimarEscala(escalaOriginal));
-        transform.localPosition = posicionOriginal;
+        
+        // ELIMINADO: Quitamos el reseteo de posición aquí. Era lo que te rompía la cuadrícula.
     }
 
     // --- CLICK 3D (Hundir) ---
     public void OnPointerDown(PointerEventData eventData)
     {
+        // Guardamos la posición EXACTA que tiene el botón gracias al GridLayoutGroup justo al hacer clic
+        posicionOriginal = transform.localPosition;
+        
+        // Hundimos el botón
         transform.localPosition = new Vector3(posicionOriginal.x, posicionOriginal.y - distanciaHundimiento, posicionOriginal.z);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        // Lo devolvemos a su posición de la cuadrícula
         transform.localPosition = posicionOriginal;
     }
 

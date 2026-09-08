@@ -32,7 +32,9 @@ public class ObjetoRecogible : MonoBehaviour, IInteractuable
         InventoryManager inventarioJugador = jugador.GetComponent<InventoryManager>();
         IdentificadorObjeto idObjeto = GetComponent<IdentificadorObjeto>();
 
-        // 1. Caso: Es un Coleccionable / Trofeo
+        bool objetoProcesado = false;
+
+        // --- 1. LÓGICA DE LA GALERÍA DE TROFEOS ---
         if (datosDelTrofeo != null)
         {
             SaveManager saveManager = FindFirstObjectByType<SaveManager>();
@@ -43,43 +45,33 @@ public class ObjetoRecogible : MonoBehaviour, IInteractuable
                 if (!datos.trofeosDesbloqueadosID.Contains(datosDelTrofeo.trophyID))
                 {
                     datos.trofeosDesbloqueadosID.Add(datosDelTrofeo.trophyID);
+                    saveManager.GuardarPartida(datos); // Guardamos el logro en el archivo JSON
+                    Debug.Log("<color=yellow>[Coleccionable Desbloqueado en Galería]</color> " + datosDelTrofeo.trophyName);
                 }
-
-                if (idObjeto != null && !string.IsNullOrEmpty(idObjeto.idUnico))
-                {
-                    if (!datos.objetosDestruidosUID.Contains(idObjeto.idUnico))
-                    {
-                        datos.objetosDestruidosUID.Add(idObjeto.idUnico);
-                    }
-                    
-                    if (inventarioJugador != null && !inventarioJugador.objetosDestruidosUID.Contains(idObjeto.idUnico))
-                    {
-                        inventarioJugador.objetosDestruidosUID.Add(idObjeto.idUnico);
-                    }
-                }
-
-                saveManager.GuardarPartida(datos);
-                Debug.Log("<color=yellow>[Coleccionable Desbloqueado]</color> " + datosDelTrofeo.trophyName);
+                objetoProcesado = true;
             }
-
-            Destroy(gameObject);
-            return;
         }
 
-        // 2. Caso: Es un Objeto común de Inventario
+        // --- 2. LÓGICA DEL INVENTARIO Y HOTBAR ---
         if (datosDelObjeto != null && inventarioJugador != null)
         {
             inventarioJugador.AnadirObjeto(datosDelObjeto);
+            Debug.Log("<color=green>[Objeto Añadido a la Mochila]</color> " + datosDelObjeto.nombreMostrado);
+            objetoProcesado = true;
+        }
 
+        // --- 3. DESTRUCCIÓN Y PERSISTENCIA EN EL MUNDO ---
+        if (objetoProcesado)
+        {
             if (idObjeto != null && !string.IsNullOrEmpty(idObjeto.idUnico))
             {
-                if (!inventarioJugador.objetosDestruidosUID.Contains(idObjeto.idUnico))
+                if (inventarioJugador != null && !inventarioJugador.objetosDestruidosUID.Contains(idObjeto.idUnico))
                 {
                     inventarioJugador.objetosDestruidosUID.Add(idObjeto.idUnico);
                 }
             }
 
-            Destroy(gameObject);
+            Destroy(gameObject); // Desaparece del suelo
         }
     }
 }
