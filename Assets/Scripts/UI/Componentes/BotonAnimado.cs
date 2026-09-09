@@ -6,7 +6,7 @@ using System.Collections;
 public class BotonAnimado : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, ISelectHandler, IDeselectHandler
 {
     [Header("Ajustes de Animación")]
-    public float factorEscala = 1.1f;
+    public float factorEscala = 1.4f;
     public float velocidadAnimacion = 15f;
     public float distanciaHundimiento = 4f;
 

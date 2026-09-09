@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdd46e97f1c051a488bdc72acdedc18b, type: 3}
+  m_Name: Trofeo_Snorlax
+  m_EditorClassIdentifier: Assembly-CSharp::TrofeoData
+  trophyID: trofeo_02
+  trophyName: Peluche de Snorlax
+  description: Soy yo jeje
+  icono2D: {fileID: 21300000, guid: f2627b2b64f9ed5498e636eaa0268ac6, type: 3}
+  prefabGaleria3D: {fileID: 4283549710662944612, guid: 84556d910810a774da7602eb51ba7376, type: 3}
+  rotacionInicial: {x: -105, y: 1, z: 179}
+  escalaInspeccion: {x: 0.4, y: 0.4, z: 0.4}

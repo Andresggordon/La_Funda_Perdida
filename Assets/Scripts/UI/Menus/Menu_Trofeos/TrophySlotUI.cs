@@ -32,9 +32,8 @@ public class TrophySlotUI : MonoBehaviour
             }
             else
             {
-                // Silueta oscura (Gris muy oscuro / Negro)
-                // Usamos Color(R, G, B, Alfa). 0 es negro, 1 es blanco.
-                iconoTrofeo.color = new Color(0.1f, 0.1f, 0.1f, 1f); 
+                // Silueta oscura y completamente opaca (Gris muy oscuro / Negro sólido con Alpha = 1f)
+                iconoTrofeo.color = new Color(0.01f, 0.01f, 0.01f, 1f); 
             }
         }
         else if (iconoTrofeo != null)
