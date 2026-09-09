@@ -15,7 +15,7 @@ MonoBehaviour:
   idObjeto: abono_transporte
   nombreMostrado: Abono Transporte de Paula
   descripcion: "Sin el abono no puedo coger ni el autob\xFAs ni la renfe. Menos mal
-    que Pap\xE1 me o recuerda siempre."
+    que Pap\xE1 me lo encuentra siempre que lo pierdo."
   icono: {fileID: 21300000, guid: 5864a846875ab4f4dbc7dc80857b19cc, type: 3}
   esConsumible: 0
   prefabMundo: {fileID: 6551503369848011763, guid: 0388e35fe6e4b1d4086b601504b01df7, type: 3}

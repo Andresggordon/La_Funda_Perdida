@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: Data_Abono_Transporte
   m_EditorClassIdentifier: Assembly-CSharp::TrofeoData
   trophyID: trofeo_01
-  trophyName: Foto
-  description: 
+  trophyName: Abono Transporte de Paula
+  description: "Sin el abono no puedo coger ni el autob\xFAs ni la renfe. Menos mal
+    que Pap\xE1 me lo encuentra siempre que lo pierdo."
   icono2D: {fileID: 21300000, guid: 5864a846875ab4f4dbc7dc80857b19cc, type: 3}
-  prefabGaleria3D: {fileID: 6551503369848011763, guid: 0388e35fe6e4b1d4086b601504b01df7, type: 3}
+  prefabGaleria3D: {fileID: 5968897163925278645, guid: 23dc725da0bc4454fbb594841d4cab88, type: 3}
+  rotacionInicial: {x: 0, y: 0, z: 0}
+  escalaInspeccion: {x: 10, y: 10, z: 10}

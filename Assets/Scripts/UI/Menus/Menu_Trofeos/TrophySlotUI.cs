@@ -1,46 +1,54 @@
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
+using UnityEngine.UI; // Necesario para interactuar con Image
 
-public class TrophySlotUI : MonoBehaviour, ISelectHandler, IDeselectHandler
+public class TrophySlotUI : MonoBehaviour
 {
     [Header("Referencias UI")]
-    public Image iconImage;
-    public Button slotButton;
-
-    [Header("Configuración del Trofeo")]
-    [Tooltip("Arrastra aquí el ScriptableObject TrofeoData correspondiente a este slot")]
+    [Tooltip("Arrastra aquí el componente Image del icono del trofeo")]
+    public Image iconoTrofeo;
+    
+    [Header("Datos (Se asignan solos o en el editor)")]
     public TrofeoData trofeoAsignado;
+    
+    private bool desbloqueado;
+    private TrophyGridManager manager;
 
-    [HideInInspector] public bool isUnlocked;
-
-    private TrophyGridManager myGridManager;
-
-    public void Inicializar(bool desbloqueado, TrophyGridManager manager)
+    public void Inicializar(bool estaDesbloqueado, TrophyGridManager gridManager)
     {
-        myGridManager = manager;
-        isUnlocked = desbloqueado;
+        desbloqueado = estaDesbloqueado;
+        manager = gridManager;
 
-        if (slotButton == null) slotButton = GetComponent<Button>();
-
-        if (slotButton != null)
+        if (trofeoAsignado != null && iconoTrofeo != null)
         {
-            slotButton.interactable = true;
-            slotButton.onClick.RemoveAllListeners();
-            slotButton.onClick.AddListener(NotificarSeleccion);
+            // Asignamos la imagen que toca
+            iconoTrofeo.sprite = trofeoAsignado.icono2D;
+            iconoTrofeo.gameObject.SetActive(true);
+
+            // CONTROL VISUAL: ¿Está desbloqueado?
+            if (desbloqueado)
+            {
+                // A todo color
+                iconoTrofeo.color = Color.white; 
+            }
+            else
+            {
+                // Silueta oscura (Gris muy oscuro / Negro)
+                // Usamos Color(R, G, B, Alfa). 0 es negro, 1 es blanco.
+                iconoTrofeo.color = new Color(0.1f, 0.1f, 0.1f, 1f); 
+            }
+        }
+        else if (iconoTrofeo != null)
+        {
+            iconoTrofeo.gameObject.SetActive(false);
         }
     }
 
-    private void NotificarSeleccion()
+    // Esta función debe estar conectada al evento OnClick() del botón en el Inspector
+    public void OnClickSlot()
     {
-        // Se ejecuta únicamente al hacer clic explícito o pulsar el botón de acción
-        if (myGridManager != null && trofeoAsignado != null)
+        if (manager != null && trofeoAsignado != null)
         {
-            myGridManager.OnSlotSelected(trofeoAsignado, isUnlocked);
+            manager.OnSlotSelected(trofeoAsignado, desbloqueado);
         }
     }
-
-    // Foco visual del mando de PS4 (No abre pantallas por sí solo)
-    public void OnSelect(BaseEventData eventData) { }
-    public void OnDeselect(BaseEventData eventData) { }
 }
