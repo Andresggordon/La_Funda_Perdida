@@ -230,6 +230,8 @@ GameObject:
   - component: {fileID: 7681723300580126513}
   - component: {fileID: 7371104977666729529}
   - component: {fileID: 6801160247233412399}
+  - component: {fileID: 4238018561968370755}
+  - component: {fileID: 4763733117916938507}
   m_Layer: 6
   m_Name: Abono_Transporte
   m_TagString: Untagged
@@ -309,7 +311,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6551503369848011763}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: a139f06ff63f88f4c92730afc23caa0d, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -362,6 +364,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 742a5f74c98962e44bf51b2849e39f47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObjetoInteractuable
+--- !u!54 &4238018561968370755
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6551503369848011763}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 1
+--- !u!114 &4763733117916938507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6551503369848011763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f0ae36fe9d98b542b9520a3fc2b8ca8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemFisicoFrenado
 --- !u!1 &6628902879521817331
 GameObject:
   m_ObjectHideFlags: 0

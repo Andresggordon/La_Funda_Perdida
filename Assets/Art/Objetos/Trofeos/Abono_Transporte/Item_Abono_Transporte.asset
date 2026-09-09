@@ -19,6 +19,6 @@ MonoBehaviour:
   icono: {fileID: 21300000, guid: 5864a846875ab4f4dbc7dc80857b19cc, type: 3}
   esConsumible: 0
   prefabMundo: {fileID: 6551503369848011763, guid: 0388e35fe6e4b1d4086b601504b01df7, type: 3}
-  offsetPosicion: {x: 0, y: 0, z: 0}
-  offsetRotacion: {x: 0, y: 0, z: 0}
+  offsetPosicion: {x: 0.00164, y: 0.0013, z: -0.0007}
+  offsetRotacion: {x: 17.702, y: 255.014, z: -19.834}
   offsetEscala: {x: 0.01, y: 0.01, z: 0.01}
