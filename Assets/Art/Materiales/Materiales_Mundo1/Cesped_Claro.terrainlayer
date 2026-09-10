@@ -7,7 +7,7 @@ TerrainLayer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Cesped_Claro
-  m_DiffuseTexture: {fileID: 2800000, guid: 80e055e54078d2c4dacad3033b670b1f, type: 3}
+  m_DiffuseTexture: {fileID: 2800000, guid: f473987ea10348e4eb3962f99e2f189e, type: 3}
   m_NormalMapTexture: {fileID: 0}
   m_MaskMapTexture: {fileID: 0}
   m_TileSize: {x: 2, y: 2}
