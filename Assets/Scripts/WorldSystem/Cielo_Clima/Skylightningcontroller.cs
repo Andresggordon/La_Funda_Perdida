@@ -4,9 +4,9 @@ using UnityEngine;
 // material del skybox (shader Skybox/Cubemap Blend) y a la niebla de
 // escena, leyendo la hora desde GestorTiempoMundo.Instancia.
 //
-// Este script REEMPLAZA a los antiguos DayNightCycle.cs y
-// SkyboxDayNightSync.cs. Esos dos ya no deben existir como
-// componentes en ninguna escena (puedes borrar los archivos).
+// Tambien anade un halo/brillo de atardecer que se activa segun la
+// ALTURA REAL del sol (no la hora del reloj), asi que ocurre siempre
+// justo cuando el sol esta bajo, sin importar la duracion del dia.
 [ExecuteAlways]
 public class SkyLightingController : MonoBehaviour
 {
@@ -19,31 +19,49 @@ public class SkyLightingController : MonoBehaviour
     public TimeCycleProfile profile;
 
     [Header("Nombres internos del shader (verificar en modo Debug si algo no se mueve)")]
-    [Tooltip("Confirmado que funciona: _CubemapTransition")]
     public string cubemapTransitionProperty = "_CubemapTransition";
-    public string cubemapExposureProperty = "_CubemapExposure";
-    public string cubemapTintProperty = "_CubemapTintColor";
+    public string cubemapExposureProperty = "_Exposure";
+    public string cubemapTintProperty = "_TintColor";
 
-    [Header("Niebla de escena")]
-    public bool controlSceneFog = true;
+    [Header("Resplandor (Bloom) de los quads del Sol y la Luna")]
+    [Tooltip("El material Mat_Sol de tu quad Imagen_Sol")]
+    public Material sunGlowMaterial;
+    [Tooltip("El material Mat_Luna de tu quad Imagen_Luna")]
+    public Material moonGlowMaterial;
+    [Tooltip("Propiedad de color del shader Universal Render Pipeline/Unlit")]
+    public string glowColorProperty = "_BaseColor";
 
     void LateUpdate()
     {
         if (profile == null || GestorTiempoMundo.Instancia == null) return;
 
         float t = GestorTiempoMundo.Instancia.horaActual / 24f;
+        float sunElevation01 = ComputeSunElevation01();
+        float glow = Mathf.Clamp01(profile.sunsetGlowCurve.Evaluate(sunElevation01) * profile.sunsetGlowIntensity);
+        float exposureBoost = profile.sunsetExposureBoost.Evaluate(sunElevation01);
 
-        ActualizarLuces(t);
-        ActualizarSkybox(t);
-        ActualizarAmbienteYNiebla(t);
+        ActualizarLuces(t, glow);
+        ActualizarSkybox(t, glow, exposureBoost);
+        ActualizarAmbiente(t);
+        ActualizarNiebla(t);
+        ActualizarBrilloAstros(t, glow);
     }
 
-    void ActualizarLuces(float t)
+    // 0 = sol en el horizonte, 1 = sol en el cenit
+    float ComputeSunElevation01()
+    {
+        if (sunLight == null) return 0.5f;
+        float h = Vector3.Dot(sunLight.transform.forward, Vector3.down);
+        return Mathf.Clamp01((h + 1f) * 0.5f);
+    }
+
+    void ActualizarLuces(float t, float glow)
     {
         if (sunLight != null)
         {
             sunLight.intensity = profile.sunIntensity.Evaluate(t);
-            sunLight.color = profile.sunColor.Evaluate(t);
+            Color baseColor = profile.sunColor.Evaluate(t);
+            sunLight.color = Color.Lerp(baseColor, profile.sunsetGlowColor, glow);
             sunLight.enabled = sunLight.intensity > 0.001f;
         }
 
@@ -54,12 +72,11 @@ public class SkyLightingController : MonoBehaviour
             moonLight.enabled = moonLight.intensity > 0.001f;
         }
 
-        // Cual de las dos luces maneja sombras / RenderSettings.sun
         if (sunLight != null && moonLight != null)
             RenderSettings.sun = (sunLight.intensity >= moonLight.intensity) ? sunLight : moonLight;
     }
 
-    void ActualizarSkybox(float t)
+    void ActualizarSkybox(float t, float glow, float exposureBoost)
     {
         if (skyMaterial == null) return;
 
@@ -67,22 +84,64 @@ public class SkyLightingController : MonoBehaviour
             skyMaterial.SetFloat(cubemapTransitionProperty, profile.skyboxBlendCurve.Evaluate(t));
 
         if (skyMaterial.HasProperty(cubemapExposureProperty))
-            skyMaterial.SetFloat(cubemapExposureProperty, profile.skyboxExposureCurve.Evaluate(t));
+            skyMaterial.SetFloat(cubemapExposureProperty, profile.skyboxExposureCurve.Evaluate(t) + exposureBoost);
 
         if (skyMaterial.HasProperty(cubemapTintProperty))
-            skyMaterial.SetColor(cubemapTintProperty, profile.skyboxTintColor.Evaluate(t));
+        {
+            Color baseTint = profile.skyboxTintColor.Evaluate(t);
+            Color finalTint = Color.Lerp(baseTint, profile.sunsetGlowColor, glow);
+            skyMaterial.SetColor(cubemapTintProperty, finalTint);
+        }
     }
 
-    void ActualizarAmbienteYNiebla(float t)
+    void ActualizarAmbiente(float t)
     {
+        // Forzamos el modo Trilight por codigo: si "Environment Lighting >
+        // Source" esta en Skybox (el valor por defecto de Unity), nuestros
+        // colores se ignorarian por completo sin este forzado.
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+
         Color ambiente = profile.ambientColor.Evaluate(t);
         RenderSettings.ambientSkyColor = ambiente;
         RenderSettings.ambientEquatorColor = ambiente;
+        RenderSettings.ambientGroundColor = ambiente;
+    }
 
-        if (controlSceneFog)
+    void ActualizarNiebla(float t)
+    {
+        RenderSettings.fog = profile.fogEnabled;
+        if (!profile.fogEnabled) return;
+
+        RenderSettings.fogMode = profile.fogMode;
+        RenderSettings.fogColor = profile.fogColor.Evaluate(t);
+
+        if (profile.fogMode == FogMode.Linear)
         {
-            RenderSettings.fogColor = profile.fogColor.Evaluate(t);
+            RenderSettings.fogStartDistance = profile.fogStartDistance.Evaluate(t);
+            RenderSettings.fogEndDistance = profile.fogEndDistance.Evaluate(t);
+        }
+        else
+        {
             RenderSettings.fogDensity = profile.fogDensity.Evaluate(t);
+        }
+    }
+
+    // Empuja el color por encima de 1 (HDR) para que el Bloom del
+    // Post Processing Volume lo detecte y le ponga resplandor.
+    void ActualizarBrilloAstros(float t, float glow)
+    {
+        if (sunGlowMaterial != null && sunGlowMaterial.HasProperty(glowColorProperty))
+        {
+            Color warm = Color.Lerp(profile.sunColor.Evaluate(t), profile.sunsetGlowColor, glow);
+            float boost = profile.sunIntensity.Evaluate(t) * profile.sunGlowMultiplier;
+            sunGlowMaterial.SetColor(glowColorProperty, new Color(warm.r * boost, warm.g * boost, warm.b * boost, 1f));
+        }
+
+        if (moonGlowMaterial != null && moonGlowMaterial.HasProperty(glowColorProperty))
+        {
+            Color moonBase = profile.moonColor.Evaluate(t);
+            float boost = profile.moonIntensity.Evaluate(t) * profile.moonGlowMultiplier;
+            moonGlowMaterial.SetColor(glowColorProperty, new Color(moonBase.r * boost, moonBase.g * boost, moonBase.b * boost, 1f));
         }
     }
 }

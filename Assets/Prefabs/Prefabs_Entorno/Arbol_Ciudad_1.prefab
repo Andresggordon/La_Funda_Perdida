@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 2665858331615226298}
   - component: {fileID: 3241366572254563218}
   - component: {fileID: 751131798832651178}
-  - component: {fileID: 4741206718379325011}
   - component: {fileID: 90171427165742886}
   - component: {fileID: 4052648297390530378}
   m_Layer: 0
@@ -95,28 +94,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &4741206718379325011
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1734221742037183889}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -8408591696585541760, guid: 40316db7381bdd24aa6fa3414fa83b26, type: 3}
 --- !u!136 &90171427165742886
 CapsuleCollider:
   m_ObjectHideFlags: 0
